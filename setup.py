@@ -1,23 +1,17 @@
-# Import required functions
-from setuptools import setup, find_packages
 
+from distutils.core import Extension, setup
+from Cython.Build import cythonize
+import numpy as np
 
-# Call setup function
 setup(
-    author="Florence d'Alché-Buc (Researcher), Luc Motte (Researcher), Awais Sani (Engineer), Danaël Schlewer-Becker (Engineer), Gaëtan Brison (Engineer)",
-    description="Test package using IOKR method with the long term goal to develop a Structured-Prediction Package",
-    name="IOKR",
-    version="0.1.0",
-    install_requires=["pandas","numpy","scipy","scikit-learn"],
-    python_requires=">=2.7",
-    ext_modules = cythonize(["_tree.pyx", "_splitter.pyx", "_criterion.pyx"]),
-    language_level = "3"
-)
+	ext_modules=cythonize(["_tree.pyx", "_splitter.pyx", "_criterion.pyx"], language_level = "3"), 
+	include_dirs=[np.get_include()]
+	)
 
 """
 import os
 
-import numpy
+
 from numpy.distutils.misc_util import Configuration
 
 
