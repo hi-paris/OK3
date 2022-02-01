@@ -23,7 +23,7 @@ Protocole :
 3 - Eventuellement restart le kernel de la console iPython si l'on souhaite y travailler pour prendre en compte les chanements dans les fichiers compilés
 
 
-4 - Pour lancer la batterie de tests, entrer dans un terminal : pytest tests/test_treeclf_and_reg.py
+4 - Pour lancer la batterie de tests, entrer dans un terminal : pytest tests/test_tree_clf_and_reg.py
 
 	Cela va lancer la totalité des tests de ce fichier, certains étant assez longs. (Durée totale inférieure à 11min)
 	Ces tests sont appliqués à des tâches de régression et de classification uniquement, il reste à tester sur des vrais problèmes structurés.
