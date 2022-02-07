@@ -16,6 +16,8 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url="https://github.com/hi-paris/OK3",
+    extensions = [Extension("*", ["*.pyx"])],
+    cmdclass={'build_ext': Cython.Build.build_ext},
     ext_modules=cythonize(["_tree.pyx", "_splitter.pyx", "_criterion.pyx"], language_level="3"),
     include_dirs=[np.get_include()],
     setup_requires=[
@@ -25,10 +27,9 @@ setup(
     ],
     install_requires=[
         'numpy>=1.19.2',
-        'PyObjC;platform_system=="Darwin"',
-        'PyGObject;platform_system=="Linux"',
-        'playsound==1.2.2'
-    ]
+        'cython',
+    ],
+    python_requires=">=2.7"
 )
 
 """
