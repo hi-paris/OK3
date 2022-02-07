@@ -1,5 +1,1 @@
-import _classes
-import _forest
-import base
-import kernel
-import structured_object
+from OK3 import _classes, _forest, base, kernel, structured_object
