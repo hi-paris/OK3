@@ -1,2 +1,5 @@
 # Ignore venv folder
 venv
+
+# Ignore .c files
+OK3/*.c

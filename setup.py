@@ -18,7 +18,7 @@ setup(
     url="https://github.com/hi-paris/OK3",
     #extensions = [Extension("*", ["*.pyx"])],
     #cmdclass={'build_ext': Cython.Build.build_ext},
-    ext_modules=cythonize(["_tree.pyx", "_splitter.pyx", "_criterion.pyx"], language_level="3"),
+    ext_modules=cythonize(["OK3/_tree.pyx", "OK3/_splitter.pyx", "OK3/_criterion.pyx"], language_level="3"),
     include_dirs=[np.get_include()],
     setup_requires=[
         # Setuptools 18.0 properly handles Cython extensions.
