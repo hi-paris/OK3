@@ -138,6 +138,22 @@ for name in DATASETS:
 
 
 def assert_tree_equal(d, s, message):
+    """Function to assert that 2 trees are equals.
+
+    Parameters
+    ----------
+    d : estimator object
+        Decision Tree estimator instance to check
+    s : estimator object
+        Decision Tree estimator instance to check
+    message : str
+        Message displayed when AssertionError
+
+    Returns
+    -------
+    None
+
+    """
     assert s.node_count == d.node_count, (
         "{0}: inequal number of node ({1} != {2})"
         "".format(message, s.node_count, d.node_count))
@@ -171,7 +187,13 @@ def assert_tree_equal(d, s, message):
 
 
 def test_classification_toy():
-    # Check classification on a toy dataset.
+    """Checks classification on a toy dataset
+
+    Returns
+    -------
+    None
+
+    """
     for name, Tree in OKTREES.items():
         clf = Tree(random_state=0, kernel="gini_clf")
         clf.fit(X, y)
@@ -185,7 +207,13 @@ def test_classification_toy():
 
 
 def test_weighted_classification_toy():
-    # Check classification on a weighted toy dataset.
+    """Checks classification on a weighted toy dataset
+
+    Returns
+    -------
+    None
+
+    """
     for name, Tree in OKTREES.items():
         clf = Tree(random_state=0, kernel="gini_clf")
 
@@ -199,7 +227,13 @@ def test_weighted_classification_toy():
 
 
 def test_regression_toy():
-    # Check regression on a toy dataset.
+    """Checks regression on a toy dataset
+
+    Returns
+    -------
+    None
+
+    """
     for name, Tree in OKTREES.items():
         reg = Tree(random_state=1, kernel="mse_reg")
         reg.fit(X, y)
@@ -213,7 +247,13 @@ def test_regression_toy():
 
 
 def test_xor():
-    # Check on a XOR problem
+    """Checks estimators on a XOR problem
+
+    Returns
+    -------
+    None
+
+    """
     y = np.zeros((10, 10))
     y[:5, :5] = 1
     y[5:, 5:] = 1
@@ -234,7 +274,13 @@ def test_xor():
 
 
 def test_iris():
-    # Check consistency on dataset iris.
+    """Checks consistency on iris dataset
+
+    Returns
+    -------
+    None
+
+    """
     for (name, Tree), criterion in product(OKTREES.items(), CRITERIONS):
         clf = Tree(criterion=criterion, random_state=0, kernel="gini_clf")
         clf.fit(iris.data, iris.target)
@@ -254,8 +300,24 @@ def test_iris():
 @pytest.mark.parametrize("name, Tree", OKTREES.items())
 @pytest.mark.parametrize("criterion", CRITERIONS)
 def test_diabetes_overfit(name, Tree, criterion):
-    # check consistency of overfitted trees on the diabetes dataset
-    # since the trees will overfit, we expect an MSE of 0
+    """Check consistency of overfitted trees on the diabetes dataset
+
+    Since the trees will overfit, we expect an MSE of 0
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator, key of a dict
+    Tree: estimator
+        estimator to check, value of a dict
+    criterion : {"mse", "friedman_mse", "mae"}, default="mse"
+        The function to measure the quality of a split.
+
+    Returns
+    -------
+    None
+
+    """
     reg = Tree(criterion=criterion, random_state=0, kernel="mse_reg")
     reg.fit(diabetes.data, diabetes.target)
     score = mean_squared_error(diabetes.target, reg.predict(diabetes.data))
@@ -271,9 +333,26 @@ def test_diabetes_overfit(name, Tree, criterion):
     [("mse", 15)]
 )
 def test_diabetes_underfit(name, Tree, criterion, max_depth):
-    # check consistency of trees when the depth and the number of features are
-    # limited
+    """Checks consistency of trees when the depth and the number of features are limited
 
+    Parameters
+    ----------
+    name: str
+        name of the estimator, key of a dict
+    Tree: estimator
+        estimator to check, value of a dict
+    criterion : {"mse", "friedman_mse", "mae"}, default="mse"
+        The function to measure the quality of a split.
+    max_depth : int
+        The maximum depth of the tree. If None, then nodes are expanded until
+        all leaves are pure or until all leaves contain less than
+        min_samples_split samples.
+
+    Returns
+    -------
+    None
+
+    """
     reg = Tree(
         criterion=criterion, max_depth=max_depth,
         max_features=6, random_state=0, kernel="mse_reg"
@@ -308,8 +387,13 @@ def test_diabetes_underfit(name, Tree, criterion, max_depth):
 # Il faudra donc se limiter à des dataset de taille maximum 1000 pour fiter dessus si on ne fournit pas directement la matrice de Gram.
 # 10s
 def test_arrayrepr():
-    # Check the array representation.
-    # Check resize
+    """Checks the array representation and resize
+
+    Returns
+    -------
+    None
+
+    """
     X = np.arange(1000)[:, np.newaxis]
     y = np.arange(1000)
 
@@ -319,7 +403,13 @@ def test_arrayrepr():
 
 
 def test_pure_set():
-    # Check when y is pure.
+    """Checks when y is pure ( [1, 1, 1, 1] )
+
+    Returns
+    -------
+    None
+
+    """
     X = [[-2, -1], [-1, -1], [-1, -2], [1, 1], [1, 2], [2, 1]]
     y = [1, 1, 1, 1, 1, 1]
 
@@ -337,7 +427,12 @@ def test_pure_set():
 
 
 def test_numerical_stability():
-    # Check numerical stability.
+    """Checks numerical stability
+
+    Returns
+    -------
+    None
+    """
     X = np.array([
         [152.08097839, 140.40744019, 129.75102234, 159.90493774],
         [142.50700378, 135.81935120, 117.82884979, 162.75781250],
@@ -360,7 +455,15 @@ def test_numerical_stability():
 
 
 def test_importances():
-    # Check variable importances.
+    """Checks variable importances
+
+    Check on iris that importances are the same for all builders
+
+    Returns
+    -------
+    None
+
+    """
     X, y = datasets.make_classification(n_samples=1000,
                                         n_features=10,
                                         n_informative=3,
@@ -379,7 +482,6 @@ def test_importances():
         assert importances.shape[0] == 10, "Failed with {0}".format(name)
         assert n_important == 3, "Failed with {0}".format(name)
 
-    # Check on iris that importances are the same for all builders
     clf = OK3Regressor(random_state=0, kernel="gini_clf")
     clf.fit(iris.data, iris.target)
     clf2 = OK3Regressor(random_state=0,
@@ -391,15 +493,30 @@ def test_importances():
 
 
 def test_importances_raises():
-    # Check if variable importance before fit raises ValueError.
-    clf = OK3Regressor()
+    """Check if variable importance before fit raises ValueError.
+
+    Returns
+    -------
+    None
+
+    """
+    f = OK3Regressor()
     with pytest.raises(ValueError):
         getattr(clf, 'feature_importances_')
 
 
 def test_importances_gini_equal_mse():
-    # Check that gini is equivalent to mse for binary output variable
+    """Check that gini is equivalent to mse for binary output variable
 
+    The gini index and the mean square error (variance) might differ due
+    to numerical instability. Since those instabilities mainly occurs at
+    high tree depth, we restrict this maximal depth.
+
+    Returns
+    -------
+    None
+
+    """
     X, y = datasets.make_classification(n_samples=1000,
                                         n_features=10,
                                         n_informative=3,
@@ -408,9 +525,6 @@ def test_importances_gini_equal_mse():
                                         shuffle=False,
                                         random_state=0)
 
-    # The gini index and the mean square error (variance) might differ due
-    # to numerical instability. Since those instabilities mainly occurs at
-    # high tree depth, we restrict this maximal depth.
     clf = OK3Regressor(max_depth=5,
                                   random_state=0, kernel="gini_clf").fit(X, y)
     reg = OK3Regressor(max_depth=5,
@@ -424,7 +538,13 @@ def test_importances_gini_equal_mse():
 
 
 def test_max_features():
-    # Check max_features.
+    """Checks max_features
+
+    Returns
+    -------
+    None
+
+    """
     for name, TreeRegressor in OKTREES.items():
         reg = TreeRegressor(max_features="auto", kernel="mse_reg")
         reg.fit(diabetes.data, diabetes.target)
@@ -495,7 +615,23 @@ def test_max_features():
 
 
 def test_error():
-    # Test that it gives proper exception on deficient input.
+    """Test that it gives proper exception on deficient input
+
+    Checks:
+        - predict before fit
+        - wrong feature shape for sample
+        - min_impurity_split warning
+        - Wrong dimensions
+        - Test with arrays that are non-contiguous
+        - predict before fitting
+        - predict on vector with different dims
+        - apply before fitting
+
+    Returns
+    -------
+    None
+
+    """
     for name, TreeEstimator in OKTREES.items():
         # predict before fit
         est = TreeEstimator(kernel="gini_clf")
@@ -587,7 +723,16 @@ def test_error():
 
 
 def test_min_samples_split():
-    """Test min_samples_split parameter"""
+    """Test min_samples_split parameter
+
+    test both DepthFirstTreeBuilder and BestFirstTreeBuilder
+    by setting max_leaf_nodes
+
+    Returns
+    -------
+    None
+
+    """
     X = np.asfortranarray(iris.data, dtype=_tree.DTYPE)
     y = iris.target
 
@@ -621,6 +766,16 @@ def test_min_samples_split():
 
 
 def test_min_samples_leaf():
+    """Test if leaves contain more than leaf_count training examples
+
+    test both DepthFirstTreeBuilder and BestFirstTreeBuilder
+    by setting max_leaf_nodes
+
+    Returns
+    -------
+    None
+
+    """
     # Test if leaves contain more than leaf_count training examples
     X = np.asfortranarray(iris.data, dtype=_tree.DTYPE)
     y = iris.target
@@ -657,8 +812,21 @@ def test_min_samples_leaf():
 
 
 def check_min_weight_fraction_leaf(name, datasets, sparse=False):
-    """Test if leaves contain at least min_weight_fraction_leaf of the
-    training set"""
+    """Test if leaves contain at least min_weight_fraction_leaf of the training set
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator, key of a dict
+    Tree: estimator
+        estimator to check, value of a dict
+    sparse: boolean
+        Boolean to chose between 'X_sparse' and 'X' in dataset
+
+    Returns
+    -------
+
+    """
     if sparse:
         X = DATASETS[datasets]["X_sparse"].astype(np.float32)
     else:
@@ -723,18 +891,57 @@ def check_min_weight_fraction_leaf(name, datasets, sparse=False):
 
 @pytest.mark.parametrize("name", OKTREES)
 def test_min_weight_fraction_leaf_on_dense_input(name):
+    """calls 'check_min_weight_fraction_leaf' for dense dataset
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator, key of a dict
+
+    Returns
+    -------
+    None
+
+    """
     check_min_weight_fraction_leaf(name, "iris")
 
 
 @pytest.mark.parametrize("name", SPARSE_TREES)
 def test_min_weight_fraction_leaf_on_sparse_input(name):
+    """calls 'check_min_weight_fraction_leaf' for sparse dataset
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator, key of a dict
+
+    Returns
+    -------
+    None
+
+    """
     check_min_weight_fraction_leaf(name, "multilabel", True)
 
 
 def check_min_weight_fraction_leaf_with_min_samples_leaf(name, datasets,
                                                           sparse=False):
     """Test the interaction between min_weight_fraction_leaf and min_samples_leaf
-    when sample_weights is not provided in fit."""
+    when sample_weights is not provided in fit.
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator, key of a dict
+    Tree: estimator
+        estimator to check, value of a dict
+    sparse: boolean
+        Boolean to chose between 'X_sparse' and 'X' in dataset
+
+    Returns
+    -------
+    None
+
+    """
     if sparse:
         X = DATASETS[datasets]["X_sparse"].astype(np.float32)
     else:
@@ -799,16 +1006,45 @@ def check_min_weight_fraction_leaf_with_min_samples_leaf(name, datasets,
 
 @pytest.mark.parametrize("name", OKTREES)
 def test_min_weight_fraction_leaf_with_min_samples_leaf_on_dense_input(name):
+    """Calls 'check_min_weight_fraction_leaf_with_min_samples_leaf' on dense dataset
+
+    Parameters
+    ----------
+    name
+
+    Returns
+    -------
+    None
+
+    """
     check_min_weight_fraction_leaf_with_min_samples_leaf(name, "iris")
 
 
 @pytest.mark.parametrize("name", SPARSE_TREES)
 def test_min_weight_fraction_leaf_with_min_samples_leaf_on_sparse_input(name):
+    """Calls 'check_min_weight_fraction_leaf_with_min_samples_leaf' on sparse input
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator, key of a dict
+
+    Returns
+    -------
+    None
+    """
     check_min_weight_fraction_leaf_with_min_samples_leaf(
             name, "multilabel", True)
 
 
 def test_min_impurity_split():
+    """Test if min_impurity_split creates leaves with impurity
+
+    Returns
+    -------
+    None
+
+    """
     # test if min_impurity_split creates leaves with impurity
     # [0, min_impurity_split) when min_samples_leaf = 1 and
     # min_samples_split = 2.
@@ -863,6 +1099,14 @@ def test_min_impurity_split():
 
 
 def test_min_impurity_decrease():
+    """Test if min_impurity_decrease ensure that a split is made only if
+    the impurity decrease is atleast that value
+
+    Returns
+    -------
+    None
+
+    """
     # test if min_impurity_decrease ensure that a split is made only if
     # if the impurity decrease is atleast that value
     X, y = datasets.make_classification(n_samples=1000, random_state=42)
@@ -954,6 +1198,12 @@ def test_min_impurity_decrease():
 
 
 def test_multioutput():
+    """Check estimators on multi-output problems
+
+    Returns
+    -------
+    None
+    """
     # Check estimators on multi-output problems.
     X = [[-2, -1],
           [-1, -1],
@@ -1010,6 +1260,12 @@ def test_multioutput():
 
 
 def test_unbalanced_iris():
+    """Checks class rebalancing on iris dataset
+
+    Returns
+    -------
+    None
+    """
     # Check class rebalancing.
     unbalanced_X = iris.data[:125]
     unbalanced_y = iris.target[:125]
@@ -1022,6 +1278,12 @@ def test_unbalanced_iris():
 
 
 def test_memory_layout():
+    """Checks that it works no matter the memory layout
+
+    Returns
+    -------
+    None
+    """
     # Check that it works no matter the memory layout
     for (name, TreeEstimator), dtype in product(OKTREES.items(),
                                                 [np.float64, np.float32]):
@@ -1065,6 +1327,12 @@ def test_memory_layout():
 
 
 def test_sample_weight():
+    """Checks sample weighting
+
+    Returns
+    -------
+    None
+    """
     # Check sample weighting.
     # Test that zero-weighted samples are not taken into account
     X = np.arange(100)[:, np.newaxis]
@@ -1116,6 +1384,13 @@ def test_sample_weight():
 
 
 def test_sample_weight_invalid():
+    """Checks that sample weighting raises errors
+
+    Returns
+    -------
+    None
+
+    """
     # Check sample weighting raises errors.
     X = np.arange(100)[:, np.newaxis]
     y = np.ones(100)
@@ -1213,6 +1488,12 @@ def test_sample_weight_invalid():
 
 
 def test_max_leaf_nodes():
+    """Test the max leaf nodes with greedy trees with max_depth + 1 leafs
+
+    Returns
+    -------
+    None
+    """
     # Test greedy trees with max_depth + 1 leafs.
     X, y = datasets.make_hastie_10_2(n_samples=100, random_state=1)
     k = 4
@@ -1234,6 +1515,12 @@ def test_max_leaf_nodes():
 
 
 def test_max_leaf_nodes_max_depth():
+    """Test precedence of max_leaf_nodes over max_depth.
+
+    Returns
+    -------
+    None
+    """
     # Test precedence of max_leaf_nodes over max_depth.
     X, y = datasets.make_hastie_10_2(n_samples=100, random_state=1)
     k = 4
@@ -1244,6 +1531,12 @@ def test_max_leaf_nodes_max_depth():
 
 
 def test_arrays_persist():
+    """Ensure property arrays' memory stays alive when tree disappears
+
+    Returns
+    -------
+    None
+    """
     # Ensure property arrays' memory stays alive when tree disappears
     # non-regression for #2726
     for attr in [#'y', 'leaf_to_train_exs', 'candidates',
@@ -1257,6 +1550,12 @@ def test_arrays_persist():
 
 
 def test_only_constant_features():
+    """Test the models on randomized constant features
+
+    Returns
+    -------
+    None
+    """
     random_state = check_random_state(0)
     X = np.zeros((10, 20))
     y = random_state.randint(0, 2, (10, ))
@@ -1268,6 +1567,12 @@ def test_only_constant_features():
 
 
 def test_behaviour_constant_feature_after_splits():
+    """Check the behaviour of the models with features X being reconcatenated
+
+    Returns
+    -------
+    None
+    """
     X = np.transpose(np.vstack(([[0, 0, 0, 0, 0, 1, 2, 4, 5, 6, 7]],
                                 np.zeros((4, 11)))))
     y = [0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 3]
@@ -1282,6 +1587,12 @@ def test_behaviour_constant_feature_after_splits():
 
 
 def test_with_only_one_non_constant_features():
+    """Test the behaviour of the model with only one non constant feature
+
+    Returns
+    -------
+    None
+    """
     X = np.hstack([np.array([[1.], [1.], [0.], [0.]]),
                     np.zeros((4, 1000))])
 
@@ -1300,6 +1611,12 @@ def test_with_only_one_non_constant_features():
 
 
 def test_big_input():
+    """Test the warning for very large inputs
+
+    Returns
+    -------
+    None
+    """
     # Test if the warning for too large inputs is appropriate.
     X = np.repeat(10 ** 40., 4).astype(np.float64).reshape(-1, 1)
     clf = OK3Regressor(kernel="gini_clf")
@@ -1310,12 +1627,31 @@ def test_big_input():
 
 
 def test_realloc():
+    """Test that overflowing memory will always raise a "MemoryError"
+
+    Tries to allocate <size_t>(-1) / 2 * sizeof(size_t)
+    bytes, which will always overflow.
+
+    Returns
+    -------
+    None
+    """
     from sklearn.tree._utils import _realloc_test
     with pytest.raises(MemoryError):
         _realloc_test()
 
 
 def test_huge_allocations():
+    """Test the model's behavior on too big memory allocations
+
+    Sanity check: we cannot request more memory than the size of the address
+    space.
+    Currently raises OverflowError.
+
+    Returns
+    -------
+    None
+    """
     n_bits = 8 * struct.calcsize("P")
 
     X = np.random.randn(10, 2)
@@ -1337,6 +1673,26 @@ def test_huge_allocations():
 
 
 def check_sparse_input(tree, dataset, max_depth=None, only_reg=False):
+    """Check that a sparse input is almost equal to a non-sparse input
+
+    Parameters
+    ----------
+    Tree: estimator
+        estimator to check
+    dataset: sklearn.utils.Bunch
+        Data
+    max_depth : int
+        The maximum depth of the tree. If None, then nodes are expanded until
+        all leaves are pure or until all leaves contain less than
+        min_samples_split samples.
+    only_reg: Boolean
+        Boolean control for regressors
+
+    Returns
+    -------
+    None
+
+    """
     TreeEstimator = OKTREES[tree]
     X = DATASETS[dataset]["X"]
     X_sparse = DATASETS[dataset]["X_sparse"]
@@ -1387,6 +1743,19 @@ def check_sparse_input(tree, dataset, max_depth=None, only_reg=False):
           "zeros")
 )
 def test_sparse_input(tree_type, dataset):
+    """Call 'check_sparse_input' for testing
+
+    Parameters
+    ----------
+    tree_type: estimator
+        estimator to check
+    dataset: sklearn.utils.Bunch
+        Data
+
+    Returns
+    -------
+    None
+    """
     max_depth = 3 if dataset == "digits" else None
     check_sparse_input(tree_type, dataset, max_depth)
 
@@ -1394,12 +1763,38 @@ def test_sparse_input(tree_type, dataset):
 @pytest.mark.parametrize("tree_type", SPARSE_TREES)
 @pytest.mark.parametrize("dataset", ["diabetes", "reg_small"])
 def test_sparse_input_reg_trees(tree_type, dataset):
+    """Calls 'check_sparse_input' but only for regression trees
+
+    Parameters
+    ----------
+    tree_type: estimator
+        estimator to check
+    dataset: sklearn.utils.Bunch
+        Data
+
+    Returns
+    -------
+    None
+    """
     # Due to numerical instability of MSE and too strict test, we limit the
     # maximal depth
     check_sparse_input(tree_type, dataset, 2, only_reg=True)
 
 
 def check_sparse_parameters(tree, dataset):
+    """Checks max features with dense and sparse formats
+
+    Parameters
+    ----------
+    tree: estimator
+        estimator to check
+    dataset: sklearn.utils.Bunch
+        Data
+
+    Returns
+    -------
+    None
+    """
     TreeEstimator = OKTREES[tree]
     X = DATASETS[dataset]["X"]
     X_sparse = DATASETS[dataset]["X_sparse"]
@@ -1444,6 +1839,19 @@ def check_sparse_parameters(tree, dataset):
 
 
 def check_sparse_criterion(tree, dataset):
+    """Checks criterion's influence on sparse and dense formatted trees
+
+    Parameters
+    ----------
+    tree: estimator
+        estimator to check
+    dataset: sklearn.utils.Bunch
+        Data
+
+    Returns
+    -------
+    None
+    """
     TreeEstimator = OKTREES[tree]
     X = DATASETS[dataset]["X"]
     X_sparse = DATASETS[dataset]["X_sparse"]
@@ -1469,11 +1877,41 @@ def check_sparse_criterion(tree, dataset):
 @pytest.mark.parametrize("check",
                           [check_sparse_parameters, check_sparse_criterion])
 def test_sparse(tree_type, dataset, check):
+    """Test function calling 'check_sparse_parameters' and 'check_spare_criterion
+
+    Parameters
+    ----------
+    tree_type: estimator
+        estimator to check
+    dataset: sklearn.utils.Bunch
+        Data
+    check: fixture
+        pytest.mark.parametrize
+    Returns
+    -------
+    None
+    """
     check(tree_type, dataset)
 
 
 def check_explicit_sparse_zeros(tree, max_depth=3,
                                 n_features=10):
+    """
+
+    Parameters
+    ----------
+    tree: estimator
+        estimator to check
+    max_depth : int
+        The maximum depth of the tree. If None, then nodes are expanded until
+        all leaves are pure or until all leaves contain less than
+        min_samples_split samples.
+    n_features: int
+
+    Returns
+    -------
+    None
+    """
     TreeEstimator = OKTREES[tree]
 
     # n_samples set n_feature to ease construction of a simultaneous
@@ -1544,11 +1982,32 @@ def check_explicit_sparse_zeros(tree, max_depth=3,
 
 @pytest.mark.parametrize("tree_type", SPARSE_TREES)
 def test_explicit_sparse_zeros(tree_type):
+    """Calls 'check_explicit_sparse_zero' for testing
+
+    Parameters
+    ----------
+    tree_type: estimator
+        estimator to check
+    Returns
+    -------
+    None
+    """
     check_explicit_sparse_zeros(tree_type)
 
 
 @ignore_warnings
 def check_raise_error_on_1d_input(name):
+    """Checks that 1D input arrays raise an error
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator
+
+    Returns
+    -------
+    None
+    """
     TreeEstimator = OKTREES[name]
 
     X = iris.data[:, 0].ravel()
@@ -1567,11 +2026,38 @@ def check_raise_error_on_1d_input(name):
 
 @pytest.mark.parametrize("name", OKTREES)
 def test_1d_input(name):
+    """Calls 'check_raise_error_on_1d_input' for testing
+
+    Parameters
+    ----------
+    name: str
+        Name of the estimator
+
+    Returns
+    -------
+    None
+    """
     with ignore_warnings():
         check_raise_error_on_1d_input(name)
 
-
+"""@Gaetan for completmentary checking"""
 def _check_min_weight_leaf_split_level(TreeEstimator, X, y, sample_weight):
+    """
+
+    Parameters
+    ----------
+    TreeEstimator: estimator
+    X: np.ndarray
+        Features data
+    y: np.ndarray
+        Labels data
+    sample_weight : array-like of shape (n_samples,)
+        Sample weights.
+
+    Returns
+    -------
+    None
+    """
     for kernel in ["gini_clf", "mse_reg"]:
         est = TreeEstimator(random_state=0, kernel=kernel)
         est.fit(X, y, sample_weight=sample_weight)
@@ -1581,8 +2067,19 @@ def _check_min_weight_leaf_split_level(TreeEstimator, X, y, sample_weight):
         est.fit(X, y, sample_weight=sample_weight)
         assert est.tree_.max_depth == 0
 
-
+"""@Gaetan for completmentary checking"""
 def check_min_weight_leaf_split_level(name):
+    """
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator
+
+    Returns
+    -------
+    None
+    """
     TreeEstimator = OKTREES[name]
 
     X = np.array([[0], [0], [0], [0], [1]])
@@ -1596,9 +2093,20 @@ def check_min_weight_leaf_split_level(name):
 
 @pytest.mark.parametrize("name", OKTREES)
 def test_min_weight_leaf_split_level(name):
+    """Calls '_check_min_weight_leaf_split_level' for testing
+
+    Parameters
+    ----------
+    name: str
+        Name of the estimator
+
+    Returns
+    -------
+    None
+    """
     check_min_weight_leaf_split_level(name)
 
-
+"""@Gaetan for completmentary checking"""
 def check_public_apply(name):
     X_small32 = X_small.astype(_tree.DTYPE, copy=False)
 
@@ -1608,7 +2116,7 @@ def check_public_apply(name):
         assert_array_equal(est.apply(X_small),
                             est.tree_.apply(X_small32))
 
-
+"""@Gaetan for completmentary checking"""
 def check_public_apply_sparse(name):
     X_small32 = csr_matrix(X_small.astype(_tree.DTYPE, copy=False))
 
@@ -1621,23 +2129,62 @@ def check_public_apply_sparse(name):
 
 @pytest.mark.parametrize("name", OKTREES)
 def test_public_apply_all_trees(name):
+    """Calls 'check_public_apply' for testing
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator
+
+    Returns
+    -------
+    None
+    """
     check_public_apply(name)
 
 
 @pytest.mark.parametrize("name", SPARSE_TREES)
 def test_public_apply_sparse_trees(name):
+    """Calls 'check_public_apply_sparse' for testing
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator
+
+    Returns
+    -------
+    None
+    """
     check_public_apply_sparse(name)
 
 
 def test_decision_path_hardcoded():
+    """Checks if decision path can be hardcoded
+
+    Returns
+    -------
+    None
+    """
     X = iris.data
     y = iris.target
     est = OK3Regressor(random_state=0, max_depth=1, kernel="gini_clf").fit(X, y)
     node_indicator = est.decision_path(X[:2]).toarray()
     assert_array_equal(node_indicator, [[1, 1, 0], [1, 0, 1]])
 
-
+"""@Gaetan for completmentary checking"""
 def check_decision_path(name):
+    """
+
+    Parameters
+    ----------
+    name: str
+        name of the estimator
+
+    Returns
+    -------
+    None
+    """
     X = iris.data
     y = iris.target
     n_samples = X.shape[0]
@@ -1668,10 +2215,32 @@ def check_decision_path(name):
 
 @pytest.mark.parametrize("name", OKTREES)
 def test_decision_path(name):
+    """Calls 'check_decision_path' for testing
+
+    Parameters
+    ----------
+    name: str
+        Name of the estimator
+
+    Returns
+    -------
+    None
+    """
     check_decision_path(name)
 
 
 def check_no_sparse_y_support(name):
+    """Checks that sparse y raises TypeError
+
+    Parameters
+    ----------
+    name: str
+        Name of the estimator
+
+    Returns
+    -------
+    None
+    """
     X, y = X_multilabel, csr_matrix(y_multilabel)
     TreeEstimator = OKTREES[name]
     for kernel in ["gini_clf", "mse_reg"]:
@@ -1681,6 +2250,7 @@ def check_no_sparse_y_support(name):
 
 @pytest.mark.parametrize("name", OKTREES)
 def test_no_sparse_y_support(name):
+    """Calls 'check_no_sparse_y_support' for testing"""
     # Currently we don't support sparse y
     check_no_sparse_y_support(name)
 
@@ -1783,6 +2353,12 @@ def test_no_sparse_y_support(name):
 
 
 def test_criterion_copy():
+    """Checks that copy of criterion has the same type and properties as the original
+
+    Returns
+    -------
+    None
+    """
     # Let's check whether copy of our criterion has the same type
     # and properties as original
     n_samples = 100
@@ -1800,6 +2376,12 @@ def test_criterion_copy():
 
 
 def test_empty_leaf_infinite_threshold():
+    """Checks that an empty leaf can be created by using near infinite values of X
+
+    Returns
+    -------
+    None
+    """
     # try to make empty leaf by using near infinite value.
     data = np.random.RandomState(0).randn(100, 11) * 2e38
     data = np.nan_to_num(data.astype('float32'))
@@ -1815,7 +2397,7 @@ def test_empty_leaf_infinite_threshold():
         assert len(infinite_threshold) == 0
         assert len(empty_leaf) == 0
 
-
+"""@Gaetan for completmentary checking"""
 @pytest.mark.parametrize("criterion", CRITERIONS)
 @pytest.mark.parametrize(
     "dataset", sorted(set(DATASETS.keys()) - {"reg_small", "diabetes"}))
@@ -1834,7 +2416,7 @@ def test_prune_tree_classifier_are_subtrees(criterion, dataset, tree_cls):
 
     assert_pruning_creates_subtree(tree_cls, X, y, pruning_path, kernel="gini_clf")
 
-
+"""@Gaetan for completmentary checking"""
 @pytest.mark.parametrize("criterion", CRITERIONS)
 @pytest.mark.parametrize("dataset", DATASETS.keys())
 @pytest.mark.parametrize(
@@ -1853,7 +2435,7 @@ def test_prune_tree_regression_are_subtrees(criterion, dataset, tree_cls):
 
     assert_pruning_creates_subtree(tree_cls, X, y, pruning_path, kernel="mse_reg")
 
-
+"""@Gaetan for completmentary checking"""
 def test_prune_single_node_tree():
     # single node tree
     clf1 = OK3Regressor(random_state=0, kernel="gini_clf")
@@ -1865,7 +2447,7 @@ def test_prune_single_node_tree():
 
     assert_is_subtree(clf1.tree_, clf2.tree_)
 
-
+"""@Gaetan for completmentary checking"""
 def assert_pruning_creates_subtree(estimator_cls, X, y, pruning_path, kernel):
     # generate trees with increasing alphas
     estimators = []
@@ -1881,6 +2463,18 @@ def assert_pruning_creates_subtree(estimator_cls, X, y, pruning_path, kernel):
 
 
 def assert_is_subtree(tree, subtree):
+    """Function to assert that a subtree is indeed a subtree of tree
+
+    Parameters
+    ----------
+    tree : tree
+        tree tested as parent tree
+    subtree : tree
+        tree tested as child tree
+    Returns
+    -------
+    None
+    """
     assert tree.node_count >= subtree.node_count
     assert tree.max_depth >= subtree.max_depth
 
@@ -1918,7 +2512,7 @@ def assert_is_subtree(tree, subtree):
             stack.append((tree_c_right[tree_node_idx],
                           subtree_c_right[subtree_node_idx]))
 
-
+"""@Gaetan for completmentary checking"""
 def test_prune_tree_raises_negative_ccp_alpha():
     clf = OK3Regressor(kernel="gini_clf")
     msg = "ccp_alpha must be greater than or equal to 0"
@@ -1934,7 +2528,7 @@ def test_prune_tree_raises_negative_ccp_alpha():
         clf.set_params(ccp_alpha=-1.0)
         clf._prune_tree()
 
-
+"""@Gaetan for completmentary checking"""
 def check_apply_path_readonly(name):
     X_readonly = create_memmap_backed_data(X_small.astype(_tree.DTYPE,
                                                           copy=False))
@@ -1957,6 +2551,17 @@ def test_apply_path_readonly_all_trees(name):
 # TODO: Remove in v0.26
 @pytest.mark.parametrize("TreeEstimator", [OK3Regressor])
 def test_X_idx_sorted_deprecated(TreeEstimator):
+    """Checks if the FutureWarning is raised when X_idx_sorted is used
+
+    Parameters
+    ----------
+    TreeEstimator: estimator
+        estimator to check
+
+    Returns
+    -------
+    None
+    """
     X_idx_sorted = np.argsort(X, axis=0)
 
     for kernel in ["gini_clf", "mse_reg"]:
