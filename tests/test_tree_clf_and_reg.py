@@ -500,7 +500,7 @@ def test_importances_raises():
     None
 
     """
-    f = OK3Regressor()
+    clf = OK3Regressor()
     with pytest.raises(ValueError):
         getattr(clf, 'feature_importances_')
 
