@@ -30,3 +30,4 @@ jobs:
       run: |
         pip install pytest
         pytest tests/test_tree_clf_and_reg.py
+        pytest tests/test_complementary.py
