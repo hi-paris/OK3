@@ -1,36 +1,302 @@
 # pythonOK3
 classes and methods to implement the OK3 method : decision trees with a kernelized output for structured prediction.
 
+To easily test OK3, it is built in order to take as argument output vectors matrixes rather than Gram matrixes only.
+It will build internally the Gram output matrix and return it to the 'true" fit and predict methods.
 
-Afin de tester facilement OK3, j'ai fais en sorte qu'il puisse prendre en argument des matrices de vecteurs de sortie plutôt que uniquement des matrices de Gram, il construira ensuite en interne la matrice de Gram des sorties et la donnera au "vraies" méthodes fit et predict notamment.
+To test the OK3 trees with multilabel classification or regression on vector data (with Gini impurity and variance).
+Numerous tests are drafted in tests/test_tree_clf_and_reg.py and tests/tests_complementary.py
+
+## Protocol :
+
+1 - Clone 'pythonOK3' project
+
+2 - In cloned repertory, execute in terminal : `python setup.py build_ext --inplace`
+    It will compile the Cython files, et possibly create warnings (to ignore)
+
+3 - Eventually restart the Python kernel to take account of the compiled files changes.
+
+4 - To execute the tests, input in terminal : `pytest tests/test_tree_clf_and_reg.py`
+    It will execute the file's tests (Total lenght sub 11 min)
+    These tests are used on regression and classification tasks only, and tests on structured problems are still to develop.
+
+5 - Another way to quickly test those classification and regression functions and to compare the results with the classic classification and regression trees is to execute the files "test_classification.py" and "test_regression.py" that will print lines demonstrating the uniformity of classic and OK3 trees.
+
+6 - To test the structured prediction (different than simple classification and regression), cf. file "exemple_utilisation.py" (or check below) that describes how to use the OK3 trees (on a multilabel classification close to a structured prediction problem).
+
+## Usecase of OK3 Trees
+
+```python
+############################################################
+# # # # #   Exemple d'utilisation d'un arbre OK3   # # # # #
+############################################################
+
+from _classes import OK3Regressor, ExtraOK3Regressor
+from kernel import *
+from sklearn import datasets
 
 
-Pour tester les arbres OK3 pour de la classification multilabel ou de la régression sur des données vectorielles (avec respectivement un critère d'impurté Gini et variance), une série de tests est rédigée dans le fichier tests/test_tree_clf_and_reg.py.
+#%% Générer un dataset dont les sorties sont des longs vecteurs de 0 et de 1
+
+n_samples=4000
+n_features=100
+n_classes=1000
+n_labels=2
+
+# On va fitter sur la moitié, 
+#       tester sur un quart 
+#    et se servir du dernier quart comme ensemble de sorties possibles
+
+# C'est un gros jeu de données pour l'algorithme, qui montre un peu de lenteur,
+# il faut surtout bien penser à mettre des paramètres régulant la croissance de l'abre :
+# --> max_depth, max_features 
+
+X, y = datasets.make_multilabel_classification(n_samples=n_samples, 
+                                               n_features=n_features, 
+                                               n_classes=n_classes, 
+                                               n_labels=n_labels)
+
+# La première moitié constitue les données d'entrainement
+X_train = X[:n_samples//2]
+y_train = y[:n_samples//2]
+
+# Le troisième quart les données de test
+X_test = X[n_samples//2 : 3*n_samples//4]
+y_test = y[n_samples//2 : 3*n_samples//4]
+
+# Le dernier quart des sorties est utilisé pour fournir des candidats pour le décodage de l'arbre
+# Les prédictions seront donc dans cet ensemble
+y_candidates = y[3*n_samples//4:]
 
 
+#%% Fitter un (deux) arbre(s) aux données
 
-Protocole :
+# Pour cela il faut renseigner un noyau à utiliser sur 
+# les données de sorties sous forme vectorielles ci-dessus.
 
+# Pour l'instant la liste des noyaux utilisables est :
+kernel_names = ["linear", "mean_dirac", "gaussian", "laplacian"]
 
-1 - Cloner le projet 'pythonOK3'
-
-
-2 - Dans son dossier cloné, exécuter dans un terminal : python setup.py build_ext --inplace
-
-	Cela va compiler les différents fichiers Cython, et certainment lever plusieurs warnings (à ignorer)
-
-
-3 - Eventuellement restart le kernel de la console iPython si l'on souhaite y travailler pour prendre en compte les chanements dans les fichiers compilés
+# Les noyaux gaussiens et exponentiels ont un paramètre gamma réglant la "largeur" du noyau
 
 
-4 - Pour lancer la batterie de tests, entrer dans un terminal : pytest tests/test_tree_clf_and_reg.py
+# Choisissons un noyau
+# On peut indifféremment renseigner le nom (et les éventuels paramètres) :
+kernel1 = ("gaussian", .1) # ou bien kernel1 = "linear"
+# ou bien
+kernel2 = Mean_Dirac_Kernel()
 
-	Cela va lancer la totalité des tests de ce fichier, certains étant assez longs. (Durée totale inférieure à 11min)
-	Ces tests sont appliqués à des tâches de régression et de classification uniquement, il reste à tester sur des vrais problèmes structurés.
+# Ensuite on peut créer notre estimateur, qui travaillera en sachant calculer des noyaux gaussiens entre les sorties :
+ok3 = OK3Regressor(max_depth=6, max_features='sqrt', kernel=kernel1) 
+
+# c'est également à la création de l'estimateur que l'on peut renseigner 
+# la profondeur maximale, la réduction minimale d'impureté à chaque split, 
+# le nombre minimal de sample dans chaque feuille, etc comme pour les arbres classiques
+
+# On peut maintenant fitter à nos données :
+ok3.fit(X_train, y_train)
+# on aurait pu également renseigner un paramètre sample_weight : vecteur de 
+# poids positifs ou nuls sur les exemples d'entrainement : un poids zéro sur
+# un exemple signifie que l'exemple ne sera pas pris en compte
+print("check")
+# ALTERNATIVE : on peut ne renseigner le mode de calcul des noyaux que lors du 'fit' 
+# ce qui permet de changer de noyau avec le même estimateur
+# ex:
+extraok3 = ExtraOK3Regressor(max_depth=6, max_features='sqrt')
+extraok3.fit(X_train, y_train, kernel=kernel2) # l'estimateur garde en mémoire ce nouveau kernel
 
 
-5 - Une autre manière de tester très rapidement ces fonctions de classification et régression et de comparer aux résultats obtenus avec les arbres de classification et régression classique est d'exécuter les fichiers test_classification et test_regression qui vont imprimer certaines lignes démontrant la quasi identité des arbres construits par OK3 et ceux classiques.
+#%% (OPTIONNEL) Avant de décoder l'arbre
+
+# On peut :
+# obtenir la profondeur de l'arbre
+depth = ok3.get_depth()
+# obtenir le nombre de feuilles
+n_leaves = ok3.get_n_leaves()
+# obtenir les prédictions de chaque feuille sous forme de vecteurs de poids sur les sorties d'entrainement
+leaves_preds_as_weights = ok3.get_leaves_weights()
+# obtenir les indices des feuilles dans lesquelles tombent de nouvelles données
+X_test_leaves = ok3.apply(X_test)
+# obtenir les prédictions sous forme de poids pour de nouvelles données
+test_weights = ok3.predict_weights(X_test)
+# calculer le score R2 de nos prédictions dans l'espace de Hilbert dans lequel sont plongées les sorties
+r2_score = ok3.r2_score_in_Hilbert(X_test, y_test) # on peut y spécifier un vecteur sample_weight
 
 
-6 - Pour tester la prédiction structurée (différent de la régression et classification simple), voir le fichier tests.exemple_utilisation.py qui décrit comment utiliser les arbres ok3 (sur un problème de classification multilabel pouvant s'apparenter à un pb de prédiction structurée).
+#%% Décodage de(s) (l')arbre(s) pour la prédiction des sorties
 
+# Pour le décodage, on peut proposer un ensemble de sorties candidates, 
+# ou bien ne rien fournir (None), dans ce cas les sorties candidates 
+# sont les sorties des exemples d'entrainement.
+candidates_sets = [None, y_candidates]
+# on peut essayer avec candidates=y_candidates ou bien avec rien (ou None)
+
+# On peut soit décoder l'arbre par rapport à un ensemble de candidats de sorties
+leaves_preds = ok3.decode_tree(candidates=y_candidates)
+# Puis pouvoir prédire des sorties directement
+y_pred_1 = ok3.predict(X_test[::2])
+y_pred_2 = ok3.predict(X_test[1::2])
+
+print("check")
+
+# Soit décoder pour une série d'entrées en précisant les candidats
+y_pred_extra_1 = extraok3.predict(X_test[::2], candidates=y_candidates)
+y_pred_extra_2 = extraok3.predict(X_test[1::2]) # on se souvient des prédictions de chaque feuille
+
+
+#%% Evaluation des performances
+
+# On peut calculer le score R2 dans l'espace de Hilbert comme dit précédemment (qui ne nécessite pas de décodage):
+r2_score = extraok3.r2_score_in_Hilbert(X_test, y_test) # on peut y spécifier un vecteur sample_weight
+
+# On peut calculer des scores sur les vraies données décodées :
+hamming_score = ok3.score(X_test, y_test, metric="hamming") # on peut y spécifier un vecteur sample_weight
+# remarque : on est pas obligé de repréciser un ensemble de candidats maintenant que ok3 en a déjà reçu un
+
+# Une des métrique disponible pour cette fonction score est la présence de la 'top k accuracy'.
+# Pour cela il faut renseigner l'ensemble des candidats dans la fonction à chaque appel:
+top_3_score = ok3.score(X_test, y_test, candidates=y_candidates, metric="top_3") 
+# on peut renseigner n'importe quel entier à la place du 3 ci-dessus :
+top_11_score = ok3.score(X_test, y_test, candidates=y_candidates, metric="top_11") 
+
+
+#%% A savoir
+
+##### A propos de 'candidates' #####
+
+# Il faut savoir que si lorsqu'ils sont requis, les ensembles de candidats ne sont pas fournis, 
+# alors la recherche se fait dans l'ensemble des sorties du dataset d'entrainement, qui est 
+# mémorisé par l'arbre (plus rapide).
+
+# Les condidats peuvent être renseignés dans les fonctions 'decode_tree', 'predict', 
+# 'decode' (qui est un synonyme de predict), et dans 'score'.
+# Une fois un ensemble de candidats renseigné dans une de ces fonctions, l'ensemble des 
+# prédictions possibles de ses feuilles est mémorisé par l'estimateur (mais pas 
+# l'ensemble candidates lui même car étant potentiellement très grand), c'est pourquoi 
+# il n'est pas nécessaire et même pas souhaitable computationnellement de renseigner 
+# plusieurs fois le même ensemble de candidats, la première fois suffit. 
+#En revanche lorsque l'on calcule un score de top k accuracy alors il faut 
+# obligatoirement renseigner un ensemble de candidats car le décodage est différent 
+# si l'on doit renvoyer plusieurs prédictions pour chaque feuille.
+
+```
+
+## Usecase of OK3 forests
+
+```python
+###########################################################
+# # # # #   Exemple d'utilisation de forêts OK3   # # # # #
+############################################################
+
+from _forest import RandomOKForestRegressor, ExtraOKTreesRegressor
+from kernel import *
+from sklearn import datasets
+
+
+#%% Générer un dataset dont les sorties sont des longs vecteurs de 0 et de 1
+
+n_samples=1000
+n_features=100
+n_classes=1000
+n_labels=2
+
+# On va fitter sur la moitié, 
+#       tester sur un quart 
+#    et se servir du dernier quart comme ensemble de sorties possibles
+
+# C'est un gros jeu de données pour l'algorithme, qui montre un peu de lenteur,
+# il faut surtout bien penser à mettre des paramètres régulant la croissance de l'abre :
+# --> max_depth, max_features 
+
+X, y = datasets.make_multilabel_classification(n_samples=n_samples, 
+                                               n_features=n_features, 
+                                               n_classes=n_classes, 
+                                               n_labels=n_labels)
+
+# La première moitié constitue les données d'entrainement
+X_train = X[:n_samples//2]
+y_train = y[:n_samples//2]
+
+# Le troisième quart les données de test
+X_test = X[n_samples//2 : 3*n_samples//4]
+y_test = y[n_samples//2 : 3*n_samples//4]
+
+# Le dernier quart des sorties est utilisé pour fournir des candidats pour le décodage de l'arbre
+# Les prédictions seront donc dans cet ensemble
+y_candidates = y[3*n_samples//4:]
+
+
+#%% Fitter une forết aux données
+
+# Pour cela il faut renseigner un noyau à utiliser sur 
+# les données de sorties sous forme vectorielles ci-dessus.
+
+# Liste de certains noyaux utilisables :
+kernel_names = ["linear", "mean_dirac", "gaussian", "laplacian"]
+
+# Les noyaux gaussiens et laplaciens ont un paramètre réglant la "largeur" du noyau
+
+
+# Choisissons un noyau
+# On peut indifféremment renseigner le nom (et les éventuels paramètres) :
+kernel1 = ("gaussian", .1) # ou bien kernel1 = "linear"
+
+# Ensuite on peut créer notre estimateur, qui travaillera en sachant calculer des noyaux gaussiens entre les sorties :
+okforest = RandomOKForestRegressor(n_estimators=20, max_depth=6, max_features='sqrt', kernel=kernel1) 
+
+# c'est également à la création de l'estimateur que l'on peut renseigner 
+# la profondeur maximale, la réduction minimale d'impureté à chaque split, 
+# le nombre minimal de sample dans chaque feuille, etc comme pour les arbres classiques
+
+# On peut maintenant fitter à nos données :
+okforest.fit(X_train, y_train)
+# on aurait pu également renseigner un paramètre sample_weight : vecteur de 
+# poids positifs ou nuls sur les exemples d'entrainement : un poids zéro sur
+# un exemple signifie que l'exemple ne sera pas pris en compte
+
+
+#%% (OPTIONNEL) Avant de décoder l'arbre
+
+# On peut calculer le score R2 de nos prédictions dans l'espace de Hilbert dans lequel sont plongées les sorties
+r2_score = okforest.r2_score_in_Hilbert(X_test, y_test) # on peut y spécifier un vecteur sample_weight
+
+
+#%% Prédiction des sorties
+
+# Pour le décodage, on peut proposer un ensemble de sorties candidates, 
+# ou bien ne rien fournir (None), dans ce cas les sorties candidates 
+# sont les sorties des exemples d'entrainement.
+candidates_sets = [None, y_candidates]
+# on peut essayer avec candidates=y_candidates ou bien avec rien (ou None)
+
+# On peut décoder pour une série d'entrées en précisant les candidats
+y_pred_1 = okforest.predict(X_test[::2], candidates=y_candidates)
+y_pred_2 = okforest.predict(X_test[1::2]) # on se souvient des prédictions de chaque feuille
+
+
+#%% Evaluation des performances
+
+# On peut calculer le score R2 dans l'espace de Hilbert comme dit précédemment (qui ne nécessite pas de décodage):
+r2_score = okforest.r2_score_in_Hilbert(X_test, y_test) # on peut y spécifier un vecteur sample_weight
+
+# On peut calculer des scores sur les vraies données décodées :
+hamming_score = okforest.score(X_test, y_test, metric="hamming") # on peut y spécifier un vecteur sample_weight
+# remarque : on est pas obligé de repréciser un ensemble de candidats maintenant que okforest en a déjà reçu un
+
+# Une des métrique disponible pour cette fonction score est la présence de la 'top k accuracy'.
+# Pour cela il faut renseigner l'ensemble des candidats dans la fonction à chaque appel:
+top_3_score = okforest.score(X_test, y_test, candidates=y_candidates, metric="top_3") 
+# on peut renseigner n'importe quel entier à la place du 3 ci-dessus :
+top_11_score = okforest.score(X_test, y_test, candidates=y_candidates, metric="top_11") 
+
+
+#%% A savoir
+
+##### A propos de 'candidates' #####
+
+# Il faut savoir que si lorsqu'ils sont requis, les ensembles de candidats ne sont pas fournis, 
+# alors la recherche se fait dans l'ensemble des sorties du dataset d'entrainement, qui est 
+# mémorisé par l'arbre (plus rapide).
+
+# Les condidats peuvent être renseignés dans les fonctions 'predict' et 'score'.
+```
