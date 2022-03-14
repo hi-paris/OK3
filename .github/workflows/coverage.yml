@@ -1,0 +1,42 @@
+name: coverage
+
+on:
+  push:
+#    branches: [ main ]
+  schedule:
+    - cron: '0 0 1 * *'
+# pull_request:
+#    branches:
+#      - '*'
+
+
+jobs:
+  run:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python: ['3.7',]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python }}
+    steps:
+    - uses: actions/checkout@master
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: ${{ matrix.python }}
+    - name: setup OK3
+      run: |
+        pip install -r requirements.txt
+   
+   - name: Build and compile
+      run: |
+        python setup.py build_ext --inplace
+                   
+    - name: Generate coverage report
+      run: |
+        pip install pytest
+        pip install coverage
+        coverage run -m pytest
+        coverage report -m 
