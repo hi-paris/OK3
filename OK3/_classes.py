@@ -529,52 +529,53 @@ class BaseKernelizedOutputTree(StructuredOutputMixin, BaseEstimator, metaclass=A
             criterion = CRITERIA[self.criterion](X.shape[0])
         
         if "reg" in kernel and return_top_k > 1:
-            warnings.warn("On ne peut pas retourner plusieurs candidats d'outputs dans le cas d'une régression, veuillez plutôt choisir kernel=linear. "
-                          "return_top_k va etre mis à 1.")
+            warnings.warn("We cannot return several output candidates in the case of a regression, better chose kernel=linear."
+                          "return_top_k will be set to 1.")
             return_top_k = 1
         
         if candidates is None:
 
             if self.leaves_preds is None:
                 if not("clf" in kernel or "reg" in kernel):
-                    warnings.warn("Vous n'avez pas renseigné de candidats ni excécuté de précédentes prédictions, "
-                                  "le décodage se fait donc parmi l'ensemble de sorties d'entrapinement.\n"
-                                  "Si ce n'est pas ce que vous souhaitez, veuillez renseigner un ensemble de candidats de sorties afin de décoder.")
+                    warnings.warn("You haven't filled any candidates and executed previous predictions,"
+                                  "The decoding is therefore done on the ensemble of training exits.\n"
+                                  "If it is not what you are expecting, please instanciate an ensemble of exit candidates to be sure to decode.")
             
             elif self.leaves_preds.shape[0] != self.tree_.node_count*return_top_k: 
-                # cas ou leaves_preds n'est pas None mais return_top_k a changé depuis le précédent décodage
+                # case were leaves_preds is not None but return_top_k changed since previous decoding
                 if not("clf" in kernel or "reg" in kernel):
-                    warnings.warn("Vous n'avez pas renseigné de candidats et les précédents décodages demandaient un nombre différent de propositions de candidats ('return_top_k'), "
-                                  "le décodage se fait donc parmi l'ensemble de sorties d'entrapinement.\n"
-                                  "Si ce n'est pas ce que vous souhaitez, veuillez renseigner un ensemble de candidats de sorties afin de décoder.")
+                    warnings.warn("You did not instanciate any candidates and previous decoding is requiring a different number of propositions of candidates ('return_top_k'), "
+                                  "The decoding is therefore done with the ensemble of training exits.\n"
+                                  "If it is not what you are expecting, please instanciate an ensemble of exit candidates to be sure to decode.")
 
             else:
-                # le nombre de prédictions par feuille est le meme:
+                # the number of predictions per leaves is the same:
                 X_leaves = self.apply(X)
-                # X_leaves_indices est là pour aller chercher les bons indices 
-                # dans self.leaves_preds. En effet chaque noeud a return_top_k 
-                # indices d'affilé dans le tableau leaves_preds, 
-                # de node_id*return_top_k à node_id*return_top_k+return_top_k
+                # X_leaves_indices is there to fetch the right indices
+                # Within self.leaves_preds. Thus each node has return_top_k 
+                # indices in a row within the tableleaves_preds, 
+                # from node_id*return_top_k à node_id*return_top_k+return_top_k
                 X_leaves_indices = np.zeros(X_leaves.shape[0]*return_top_k, dtype=X_leaves.dtype)
                 for k in range(return_top_k):
                     X_leaves_indices[k::return_top_k] = X_leaves*return_top_k+k
                 return self.leaves_preds[X_leaves_indices]
 
-        # on calcule la totalité des sorties avec cet ensemble de candidats (et on met à jour self.leaves_preds)
+        # We calculate the entireness of exits with the ensemble of candidates (and we update self.leaves_preds)
+on calcule la totalité des sorties avec cet ensemble de candidats (et on met à jour self.leaves_preds)
         self.decode_tree(candidates, return_top_k=return_top_k)
-        # on utilise ces sorties pour calculer celles demandées
+        # We use those exits to calculate those required
         return self.predict(X, return_top_k=return_top_k)
 
     def decode(self, X, candidates=None, check_input=True, return_top_k=1):
-        """ Synonyme de predict """
+        """ synonymous of predict """
         return self.predict(X=X, candidates=candidates, check_input=check_input, return_top_k=return_top_k)
 
     def decode_tree(self, candidates=None, return_top_k=1):
         """Decode each leaves predictions of the tree, AND store the array of the decoded outputs
         as an attribut of the estimator : self.leaves_preds.
         
-        ATTENTION, les prédictions correspondant aux noeuds qui ne sont pas des feuilles n'ont aucu  sens : elles sont arbitraires.
-        Elles n'ont volontairement pas été calculées pour question d'économie de temps.
+        WARNING, the predictions corresponding to the nodes that are not leaves do not make any sense: they are arbitrary.
+        They were on purpose not calculated for time optimization purpose
 
         Parameters
         ----------
@@ -631,26 +632,27 @@ class BaseKernelizedOutputTree(StructuredOutputMixin, BaseEstimator, metaclass=A
             sq_norms_cand = self.tree_.K_y[indices, indices]
         
         if return_top_k > 1 and return_top_k >= len(candidates):
-            warnings.warn("Le nombre de prédictions demandées pour chaque entrée dépasse le nombre de sorties candidates, return_top_k va être réduit à sa valeur maximale.")
+            warnings.warn("The number of predictions required for each inputs is protruding the number of output candidates,"
+                          "return_top_k will be reduced to its max value")
             return_top_k = len(candidates)-1
         
         if "reg" in kernel.get_name() and return_top_k > 1:
-            warnings.warn("On ne peut pas retourner plusieurs candidats d'outputs dans le cas d'une régression, veuillez plutôt choisir kernel=linear. "
-                          "return_top_k va etre mis à 1.")
+            warnings.warn("We cannot return several output candidates in the case of a regression, you should better used kernel=linear."
+                          "return_top_k will be set to 1.")
             return_top_k = 1
         
         leaves_preds = self.tree_.decode_tree(K_cand_train = K_cand_train, sq_norms_cand=sq_norms_cand, criterion=criterion, kernel=kernel.get_name(), return_top_k=return_top_k)
                 
         if not("reg" in kernel.get_name() or "clf" in kernel.get_name()):
-            # les outputs récupérées sont alors des indices corrspondants au set de candidats
-            # on traduit les indices renvoyés en représentations vectorielles
+            # The outputs gathered are therefore indices corresponding to the set of candidates
+            # We translate the indices returned in vectorial representations
             leaves_preds = candidates[leaves_preds]
             
         
         if leaves_preds.shape[1] == 1:
             leaves_preds = leaves_preds.reshape(-1)
         
-        # On stocke les sorties décodées de l'arbre pour pouvoir les sortir rapidement pour les prochains décodages.
+        # We store the decoding outputs of the tree to output them quickly in the next decoding phases.
         self.leaves_preds = leaves_preds
         
         return leaves_preds
@@ -684,7 +686,7 @@ class BaseKernelizedOutputTree(StructuredOutputMixin, BaseEstimator, metaclass=A
 
     def score(self, X, y, candidates=None, metric="accuracy", sample_weight=None):
         """
-        Calcule le score après décodage 
+        Calculate score after decoding
         
         Return either
         
@@ -743,7 +745,7 @@ class BaseKernelizedOutputTree(StructuredOutputMixin, BaseEstimator, metaclass=A
                 return_top_k = int(metric[4:])
                 top_k_score = True
             except ValueError:
-                raise(ValueError("Pour calculer le score 'top k', veuillez renseigner un nombre juste après le 'top_'. Nous avons reçu '"+metric[4:]+"'."))
+                raise(ValueError("To calculate score 'top k', please enter a number just after the'top_'. We have received '"+metric[4:]+"'."))
         
         y_pred = self.predict(X, candidates=candidates, return_top_k=return_top_k)
         
@@ -766,12 +768,12 @@ class BaseKernelizedOutputTree(StructuredOutputMixin, BaseEstimator, metaclass=A
                     score = np.sum(contains_true) / len(y)
                 return score
             else:
-                raise ValueError("La metric renseignée n'est pas prise en charge.")
+                raise ValueError("The entered metric is not taken into consideration.")
 
 
     def r2_score_in_Hilbert(self, X, y, sample_weight=None):
         """
-        Calcule le score R2 SANS décodage 
+        Calculate R2 score without decoding
         
         Return the coefficient of determination R^2 of the prediction in the Hilbert space.
         The coefficient R^2 is defined as (1 - u/v), where u is the residual
