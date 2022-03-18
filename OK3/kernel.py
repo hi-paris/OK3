@@ -91,8 +91,8 @@ class Linear_Kernel(Kernel):
 
 class MSE_Kernel(Linear_Kernel):
     """
-    Identique au 'Linear_Kernel', mais permet de signaler que le décodage 
-    ne se fait pas parmi un candidates set mais est une solution exacte.
+    Similar to 'Linear_Kernel', but enable to flag that the decoding is done on
+    an exact solution and not within the set of candidates.
     """
     
     def __init__(self):
@@ -150,11 +150,12 @@ class Gaussian_Kernel(Kernel):
     
 
 
-# Attention, noyau calculé naïvement : pas optimisé.
+# WARNING, Attention, naïvly calculated kernel: non optimized.
         
 # kernel for permutations
-# les permutations sigma de Sn sont représentées par des vecteurs y de 
-# même taille n où y[i] = p <=> sigma(i) = p
+# Permutations sigma of Sn are represented as vectors y of same les permutations sigma de Sn sont représentées par des vecteurs y de 
+# size n where y[i] = p <=> sigma(i) = p 
+
 class Mallows_Kernel(Kernel):
 
     def __init__(self, gamma=1):
