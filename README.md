@@ -28,7 +28,7 @@ Numerous tests are drafted in tests/test_tree_clf_and_reg.py and tests/tests_com
 
 ```python
 ############################################################
-# # # # #   Exemple d'utilisation d'un arbre OK3   # # # # #
+# # # # #           How to use OK3 Trees           # # # # #
 ############################################################
 
 from _classes import OK3Regressor, ExtraOK3Regressor
@@ -36,19 +36,19 @@ from kernel import *
 from sklearn import datasets
 
 
-#%% Générer un dataset dont les sorties sont des longs vecteurs de 0 et de 1
+#%% Generate a dataset with outputs being long vectors of 0 and 1
 
 n_samples=4000
 n_features=100
 n_classes=1000
 n_labels=2
 
-# On va fitter sur la moitié, 
-#       tester sur un quart 
-#    et se servir du dernier quart comme ensemble de sorties possibles
+# Fit on a half, 
+# Testing on a quarter, 
+# Last quarter used as possible outputs' ensemble
 
-# C'est un gros jeu de données pour l'algorithme, qui montre un peu de lenteur,
-# il faut surtout bien penser à mettre des paramètres régulant la croissance de l'abre :
+# It is a big dataset for the algorithm, so it is kind of slow,
+# Using parameters regulating the tree's growth will help:
 # --> max_depth, max_features 
 
 X, y = datasets.make_multilabel_classification(n_samples=n_samples, 
@@ -56,128 +56,125 @@ X, y = datasets.make_multilabel_classification(n_samples=n_samples,
                                                n_classes=n_classes, 
                                                n_labels=n_labels)
 
-# La première moitié constitue les données d'entrainement
+# First half is the training set
 X_train = X[:n_samples//2]
 y_train = y[:n_samples//2]
 
-# Le troisième quart les données de test
+# Third quarter is the test set
 X_test = X[n_samples//2 : 3*n_samples//4]
 y_test = y[n_samples//2 : 3*n_samples//4]
 
-# Le dernier quart des sorties est utilisé pour fournir des candidats pour le décodage de l'arbre
-# Les prédictions seront donc dans cet ensemble
+# The last quarter of outputs is used to have candidates for the tree's decoding
+# Predictions will be in this ensemble
 y_candidates = y[3*n_samples//4:]
 
 
-#%% Fitter un (deux) arbre(s) aux données
+#%% Fitting one (two) tree(s) to the data
 
-# Pour cela il faut renseigner un noyau à utiliser sur 
-# les données de sorties sous forme vectorielles ci-dessus.
+# A kernel must be chosen to be used on output datas in vectorial format above
 
-# Pour l'instant la liste des noyaux utilisables est :
+# For now the list of usable kernels is :
 kernel_names = ["linear", "mean_dirac", "gaussian", "laplacian"]
 
-# Les noyaux gaussiens et exponentiels ont un paramètre gamma réglant la "largeur" du noyau
+# Gaussian and exponential kernels have a parameter gamma to the the width of the kernel
 
 
-# Choisissons un noyau
-# On peut indifféremment renseigner le nom (et les éventuels paramètres) :
+# Let's choose a kernel
+# We can indifferently input the name (and its potential parameters) :
 kernel1 = ("gaussian", .1) # ou bien kernel1 = "linear"
-# ou bien
+# Or
 kernel2 = Mean_Dirac_Kernel()
 
-# Ensuite on peut créer notre estimateur, qui travaillera en sachant calculer des noyaux gaussiens entre les sorties :
+# Then we can create our estimator, that will work calculating gaussian kernels between outputs :
 ok3 = OK3Regressor(max_depth=6, max_features='sqrt', kernel=kernel1) 
 
-# c'est également à la création de l'estimateur que l'on peut renseigner 
-# la profondeur maximale, la réduction minimale d'impureté à chaque split, 
-# le nombre minimal de sample dans chaque feuille, etc comme pour les arbres classiques
+# It is also while creating the estimator that we can fulfill 
+# the maximum depth, the impurity's minimal reduction on each split, 
+# The minimal number of samples in each leaf, etc as in classical trees
 
-# On peut maintenant fitter à nos données :
+# We can now fit the estimator to our training data :
 ok3.fit(X_train, y_train)
-# on aurait pu également renseigner un paramètre sample_weight : vecteur de 
-# poids positifs ou nuls sur les exemples d'entrainement : un poids zéro sur
-# un exemple signifie que l'exemple ne sera pas pris en compte
+# We could also input a "sample_weight" parameter : a weight vector, positive or null on the training examples: 
+# A weight "0" in an example means that the example will not be taken into accountun
 print("check")
-# ALTERNATIVE : on peut ne renseigner le mode de calcul des noyaux que lors du 'fit' 
-# ce qui permet de changer de noyau avec le même estimateur
+# ALTERNATIVE : we can also fulfill only the computation mode of the kernels during the 'fit' 
+# allowing us to change the kernel with the same estimator
 # ex:
 extraok3 = ExtraOK3Regressor(max_depth=6, max_features='sqrt')
-extraok3.fit(X_train, y_train, kernel=kernel2) # l'estimateur garde en mémoire ce nouveau kernel
+extraok3.fit(X_train, y_train, kernel=kernel2) # the estimator will keep in memory this new kernel
 
 
-#%% (OPTIONNEL) Avant de décoder l'arbre
+#%% (OPTIONAL) Before decoding the tree
 
-# On peut :
-# obtenir la profondeur de l'arbre
+# We can :
+# get the tree's depth
 depth = ok3.get_depth()
-# obtenir le nombre de feuilles
+# get the number of leaves
 n_leaves = ok3.get_n_leaves()
-# obtenir les prédictions de chaque feuille sous forme de vecteurs de poids sur les sorties d'entrainement
+# get the predictions of each leaf with weight vectors on training outputs
 leaves_preds_as_weights = ok3.get_leaves_weights()
-# obtenir les indices des feuilles dans lesquelles tombent de nouvelles données
+# get the leaves with new data
 X_test_leaves = ok3.apply(X_test)
-# obtenir les prédictions sous forme de poids pour de nouvelles données
+# get the predictions for new data with weights
 test_weights = ok3.predict_weights(X_test)
-# calculer le score R2 de nos prédictions dans l'espace de Hilbert dans lequel sont plongées les sorties
-r2_score = ok3.r2_score_in_Hilbert(X_test, y_test) # on peut y spécifier un vecteur sample_weight
+# Compute the R2 score of our predictions in Hilbert's Space in which are set the outputs
+r2_score = ok3.r2_score_in_Hilbert(X_test, y_test) # We can specify a vector sample_weight
 
 
-#%% Décodage de(s) (l')arbre(s) pour la prédiction des sorties
+#%% Deconding the tree(s) for outputs' prediction
 
-# Pour le décodage, on peut proposer un ensemble de sorties candidates, 
-# ou bien ne rien fournir (None), dans ce cas les sorties candidates 
-# sont les sorties des exemples d'entrainement.
+# For decoding, we can propose an ensemble of candidates' outputs, 
+# or we can "None" it. In this case the candidates' outputs are the training example's outputs
 candidates_sets = [None, y_candidates]
-# on peut essayer avec candidates=y_candidates ou bien avec rien (ou None)
+# We can try with candidates=y_candidates or with nothing (ou None)
 
-# On peut soit décoder l'arbre par rapport à un ensemble de candidats de sorties
+# We can either decode the tree considering an ensemble of candidates' outputs
 leaves_preds = ok3.decode_tree(candidates=y_candidates)
-# Puis pouvoir prédire des sorties directement
+# Then be able to predict quickly the outputs
 y_pred_1 = ok3.predict(X_test[::2])
 y_pred_2 = ok3.predict(X_test[1::2])
 
 print("check")
 
-# Soit décoder pour une série d'entrées en précisant les candidats
+# Or we can decode for a serie of inputs, by fulfilling the candidates
 y_pred_extra_1 = extraok3.predict(X_test[::2], candidates=y_candidates)
-y_pred_extra_2 = extraok3.predict(X_test[1::2]) # on se souvient des prédictions de chaque feuille
+y_pred_extra_2 = extraok3.predict(X_test[1::2]) # Remember the predictions from each leaf
 
 
-#%% Evaluation des performances
+#%% Performance's evaluation
 
-# On peut calculer le score R2 dans l'espace de Hilbert comme dit précédemment (qui ne nécessite pas de décodage):
-r2_score = extraok3.r2_score_in_Hilbert(X_test, y_test) # on peut y spécifier un vecteur sample_weight
+# We can calculate the R2 score in the Hilbert's Space as said before (no need for decoding):
+r2_score = extraok3.r2_score_in_Hilbert(X_test, y_test) # We can specify a 'sample_weight' vector
 
-# On peut calculer des scores sur les vraies données décodées :
-hamming_score = ok3.score(X_test, y_test, metric="hamming") # on peut y spécifier un vecteur sample_weight
-# remarque : on est pas obligé de repréciser un ensemble de candidats maintenant que ok3 en a déjà reçu un
+# We can compute scores on the real decoded datas :
+hamming_score = ok3.score(X_test, y_test, metric="hamming") # We can specify a 'sample_weight' vector
+# Note : It is not necessary to fulfill again a candidates' ensemble since OK3 already got one
 
-# Une des métrique disponible pour cette fonction score est la présence de la 'top k accuracy'.
-# Pour cela il faut renseigner l'ensemble des candidats dans la fonction à chaque appel:
+# One of the KPI available for this score function is the 'top k accuracy'.
+# To get it we need to fulfill the candidates' ensemble in the function on each call:
 top_3_score = ok3.score(X_test, y_test, candidates=y_candidates, metric="top_3") 
-# on peut renseigner n'importe quel entier à la place du 3 ci-dessus :
+# We can fulfill any int rather than the "3" above :
 top_11_score = ok3.score(X_test, y_test, candidates=y_candidates, metric="top_11") 
 
 
-#%% A savoir
+#%% Miscellaneous things to know
 
-##### A propos de 'candidates' #####
+##### About 'candidates' #####
 
-# Il faut savoir que si lorsqu'ils sont requis, les ensembles de candidats ne sont pas fournis, 
-# alors la recherche se fait dans l'ensemble des sorties du dataset d'entrainement, qui est 
-# mémorisé par l'arbre (plus rapide).
+# When the candidates ensembles are required, they are not provided, 
+# So the research is done with the training dataset's outputs' ensemble,  
+# memorized by the tree (faster).
 
-# Les condidats peuvent être renseignés dans les fonctions 'decode_tree', 'predict', 
-# 'decode' (qui est un synonyme de predict), et dans 'score'.
-# Une fois un ensemble de candidats renseigné dans une de ces fonctions, l'ensemble des 
-# prédictions possibles de ses feuilles est mémorisé par l'estimateur (mais pas 
-# l'ensemble candidates lui même car étant potentiellement très grand), c'est pourquoi 
-# il n'est pas nécessaire et même pas souhaitable computationnellement de renseigner 
-# plusieurs fois le même ensemble de candidats, la première fois suffit. 
-#En revanche lorsque l'on calcule un score de top k accuracy alors il faut 
-# obligatoirement renseigner un ensemble de candidats car le décodage est différent 
-# si l'on doit renvoyer plusieurs prédictions pour chaque feuille.
+# The candidates can be informed in the functions 'decode_tree', 'predict', 
+# 'decode' (which is equal to 'predict), and in 'score'.
+# Once that an ensemble of candidates is fulfilled in one of this functions, the ensemble of 
+# possible predictions on leafs is memorized by the estimator (but not the ensemble of candidates 
+# itself because too big) , that's why
+# it is not mandatory and even unwishable compute-wise to inform several times 
+# the same ensemble of candidates. The first time is enough. 
+# On the other hand when we compute a top k accuracy score then it is mandatory 
+# to inform an ensemble of candidates because the decoding is different 
+# if we need to return several predictions for each leaf.
 
 ```
 
@@ -185,7 +182,7 @@ top_11_score = ok3.score(X_test, y_test, candidates=y_candidates, metric="top_11
 
 ```python
 ###########################################################
-# # # # #   Exemple d'utilisation de forêts OK3   # # # # #
+# # # # #   How to use OK3's forests   # # # # #
 ############################################################
 
 from _forest import RandomOKForestRegressor, ExtraOKTreesRegressor
@@ -193,110 +190,114 @@ from kernel import *
 from sklearn import datasets
 
 
-#%% Générer un dataset dont les sorties sont des longs vecteurs de 0 et de 1
+#%% Generate a dataset with outputs being big vectors of 0 and 1
 
 n_samples=1000
 n_features=100
 n_classes=1000
 n_labels=2
 
-# On va fitter sur la moitié, 
-#       tester sur un quart 
-#    et se servir du dernier quart comme ensemble de sorties possibles
+# Fit on a half, 
+# Testing on a quarter, 
+# Last quarter used as possible outputs' ensemble
 
-# C'est un gros jeu de données pour l'algorithme, qui montre un peu de lenteur,
-# il faut surtout bien penser à mettre des paramètres régulant la croissance de l'abre :
-# --> max_depth, max_features 
+# It is a big dataset for the algorithm, so it is kind of slow,
+# Using parameters regulating the tree's growth will help:
+# --> max_depth, max_features s 
 
 X, y = datasets.make_multilabel_classification(n_samples=n_samples, 
                                                n_features=n_features, 
                                                n_classes=n_classes, 
                                                n_labels=n_labels)
 
-# La première moitié constitue les données d'entrainement
+# First half is the training set
 X_train = X[:n_samples//2]
 y_train = y[:n_samples//2]
 
-# Le troisième quart les données de test
+# Third quarter is the test set
 X_test = X[n_samples//2 : 3*n_samples//4]
 y_test = y[n_samples//2 : 3*n_samples//4]
 
-# Le dernier quart des sorties est utilisé pour fournir des candidats pour le décodage de l'arbre
-# Les prédictions seront donc dans cet ensemble
+# The last quarter of outputs is used to have candidates for the tree's decoding
+# Predictions will be in this ensemble
 y_candidates = y[3*n_samples//4:]
 
 
-#%% Fitter une forết aux données
+#%% Fit a forest to the data
 
-# Pour cela il faut renseigner un noyau à utiliser sur 
-# les données de sorties sous forme vectorielles ci-dessus.
+# A kernel must be chosen to be used on output datas in vectorial format above
 
-# Liste de certains noyaux utilisables :
+# For now the list of usable kernels is :
 kernel_names = ["linear", "mean_dirac", "gaussian", "laplacian"]
 
-# Les noyaux gaussiens et laplaciens ont un paramètre réglant la "largeur" du noyau
+# Gaussian and exponential kernels have a parameter gamma to the the width of the kernel
 
-
-# Choisissons un noyau
-# On peut indifféremment renseigner le nom (et les éventuels paramètres) :
+# Let's choose a kernel
+# We can indifferently input the name (and its potential parameters) :
 kernel1 = ("gaussian", .1) # ou bien kernel1 = "linear"
 
-# Ensuite on peut créer notre estimateur, qui travaillera en sachant calculer des noyaux gaussiens entre les sorties :
+# Then we can create our estimator, that will work calculating gaussian kernels between outputs :
 okforest = RandomOKForestRegressor(n_estimators=20, max_depth=6, max_features='sqrt', kernel=kernel1) 
 
-# c'est également à la création de l'estimateur que l'on peut renseigner 
-# la profondeur maximale, la réduction minimale d'impureté à chaque split, 
-# le nombre minimal de sample dans chaque feuille, etc comme pour les arbres classiques
+# It is also while creating the estimator that we can fulfill 
+# the maximum depth, the impurity's minimal reduction on each split, 
+# The minimal number of samples in each leaf, etc as in classical trees
 
-# On peut maintenant fitter à nos données :
+# We can now fit the estimator to our training data :
 okforest.fit(X_train, y_train)
-# on aurait pu également renseigner un paramètre sample_weight : vecteur de 
-# poids positifs ou nuls sur les exemples d'entrainement : un poids zéro sur
-# un exemple signifie que l'exemple ne sera pas pris en compte
+# We could also input a "sample_weight" parameter : a weight vector, positive or null on the training examples: 
+# A weight "0" in an example means that the example will not be taken into account
+
+#%% (OPTIONAL) Before decoding the tree
+
+# We can get the R2 score of our predictions in the Hilbert space in which are set the outputs
+r2_score = okforest.r2_score_in_Hilbert(X_test, y_test) # We can specify a vector sample_weight
 
 
-#%% (OPTIONNEL) Avant de décoder l'arbre
+#%% Outputs' prediction
 
-# On peut calculer le score R2 de nos prédictions dans l'espace de Hilbert dans lequel sont plongées les sorties
-r2_score = okforest.r2_score_in_Hilbert(X_test, y_test) # on peut y spécifier un vecteur sample_weight
-
-
-#%% Prédiction des sorties
-
-# Pour le décodage, on peut proposer un ensemble de sorties candidates, 
-# ou bien ne rien fournir (None), dans ce cas les sorties candidates 
-# sont les sorties des exemples d'entrainement.
+# For decoding, we can propose an ensemble of candidates' outputs, 
+# or we can "None" it. In this case the candidates' outputs are the training example's outputs
 candidates_sets = [None, y_candidates]
-# on peut essayer avec candidates=y_candidates ou bien avec rien (ou None)
+# We can try with candidates=y_candidates or with nothing (ou None)
 
-# On peut décoder pour une série d'entrées en précisant les candidats
+# Or we can decode for a serie of inputs, by fulfilling the candidates
 y_pred_1 = okforest.predict(X_test[::2], candidates=y_candidates)
-y_pred_2 = okforest.predict(X_test[1::2]) # on se souvient des prédictions de chaque feuille
+y_pred_2 = okforest.predict(X_test[1::2])  # Remember the predictions from each leaf
 
 
-#%% Evaluation des performances
+#%% Performance's evaluation
 
-# On peut calculer le score R2 dans l'espace de Hilbert comme dit précédemment (qui ne nécessite pas de décodage):
+# We can calculate the R2 score in the Hilbert's Space as said before (no need for decoding):
 r2_score = okforest.r2_score_in_Hilbert(X_test, y_test) # on peut y spécifier un vecteur sample_weight
 
-# On peut calculer des scores sur les vraies données décodées :
+# We can compute scores on the real decoded datas :
 hamming_score = okforest.score(X_test, y_test, metric="hamming") # on peut y spécifier un vecteur sample_weight
-# remarque : on est pas obligé de repréciser un ensemble de candidats maintenant que okforest en a déjà reçu un
+# Note : It is not necessary to fulfill again a candidates' ensemble since OK3 already got one
 
-# Une des métrique disponible pour cette fonction score est la présence de la 'top k accuracy'.
-# Pour cela il faut renseigner l'ensemble des candidats dans la fonction à chaque appel:
+# One of the KPI available for this score function is the 'top k accuracy'.
+# To get it we need to fulfill the candidates' ensemble in the function on each call:
 top_3_score = okforest.score(X_test, y_test, candidates=y_candidates, metric="top_3") 
-# on peut renseigner n'importe quel entier à la place du 3 ci-dessus :
+# We can fulfill any int rather than the "3" above :
 top_11_score = okforest.score(X_test, y_test, candidates=y_candidates, metric="top_11") 
 
 
-#%% A savoir
+#%% Miscellaneous things to know
 
-##### A propos de 'candidates' #####
+##### About 'candidates' #####
 
-# Il faut savoir que si lorsqu'ils sont requis, les ensembles de candidats ne sont pas fournis, 
-# alors la recherche se fait dans l'ensemble des sorties du dataset d'entrainement, qui est 
-# mémorisé par l'arbre (plus rapide).
+# When the candidates ensembles are required, they are not provided, 
+# So the research is done with the training dataset's outputs' ensemble,  
+# memorized by the tree (faster).
 
-# Les condidats peuvent être renseignés dans les fonctions 'predict' et 'score'.
+# The candidates can be informed in the functions 'decode_tree', 'predict', 
+# 'decode' (which is equal to 'predict), and in 'score'.
+# Once that an ensemble of candidates is fulfilled in one of this functions, the ensemble of 
+# possible predictions on leafs is memorized by the estimator (but not the ensemble of candidates 
+# itself because too big) , that's why
+# it is not mandatory and even unwishable compute-wise to inform several times 
+# the same ensemble of candidates. The first time is enough. 
+# On the other hand when we compute a top k accuracy score then it is mandatory 
+# to inform an ensemble of candidates because the decoding is different 
+# if we need to return several predictions for each leaf.
 ```
