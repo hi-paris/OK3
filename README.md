@@ -1,3 +1,8 @@
+![Build Status](https://github.com/hi-paris/OK3/workflows/pytesting/badge.svg) 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Github All Releases](https://img.shields.io/github/downloads/hi-paris/OK3/total.svg)]()
+_#Waiting for "pytesting" upcoming validation_
+
 # pythonOK3
 classes and methods to implement the OK3 method : decision trees with a kernelized output for structured prediction.
 
