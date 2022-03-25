@@ -29,6 +29,100 @@ Numerous tests are drafted in tests/test_tree_clf_and_reg.py and tests/tests_com
 
 6 - To test the structured prediction (different than simple classification and regression), cf. file "exemple_utilisation.py" (or check below) that describes how to use the OK3 trees (on a multilabel classification close to a structured prediction problem).
 
+
+
+This open source Python library provide several methods for Output Kernelization.
+
+
+Website and documentation: [https://OK3.github.io/](https://OK3.github.io/)
+
+Source Code (MIT): [https://github.com/OK3/OK3](https://github.com/OK3/OK3)
+
+
+## Installation
+
+The library has been tested on Linux, MacOSX and Windows. It requires a C++ compiler for building/installing the EMD solver and relies on the following Python modules:
+
+- Pandas (>=1.2)
+- Numpy (>=1.16)
+- Scipy (>=1.0)
+- Scikit-learn (>=1.0) 
+
+#### Pip installation
+
+
+You can install the toolbox through PyPI with:
+
+```console
+pip install OK3
+```
+
+#### Anaconda installation with conda-forge
+
+If you use the Anaconda python distribution, POT is available in [conda-forge](https://conda-forge.org). To install it and the required dependencies:
+
+```console
+conda install -c conda-forge OK3
+```
+
+#### Post installation check
+After a correct installation, you should be able to import the module without errors:
+
+```python
+import OK3
+```
+
+
+
+
+### Examples and Notebooks
+
+The examples folder contain several examples and use case for the library. The full documentation with examples and output is available on [https://IOKR.github.io/](https://OK3.github.io/).
+
+
+## Acknowledgements
+
+This toolbox has been created and is maintained by
+
+* [Hi! PARIS](https://www.hi-paris.fr/)
+
+
+The contributors to this library are 
+
+* [Florence d'Alché-Buc](https://perso.telecom-paristech.fr/fdalche/) (Researcher)
+
+
+
+## Contributions and code of conduct
+
+Every contribution is welcome and should respect the [contribution guidelines](.github/CONTRIBUTING.md). Each member of the project is expected to follow the [code of conduct](.github/CODE_OF_CONDUCT.md).
+
+## Support
+
+You can ask questions and join the development discussion:
+
+* On the IOKR [slack channel](https://OK3-toolbox.slack.com)
+* On the IOKR [gitter channel](https://gitter.im/OK3/community)
+* On the IOKR [mailing list](https://mail.python.org/mm3/mailman3/lists/OK3.python.org/)
+
+You can also post bug reports and feature requests in Github issues. Make sure to read our [guidelines](.github/CONTRIBUTING.md) first.
+
+## References
+
+[1] Brouard, C., d'Alché-Buc, F., Szafranski, M. (2013, November). [Semi-supervised Penalized Output Kernel Regression for
+Link Prediction](https://hal.archives-ouvertes.fr/hal-00654123/document). 28th International Conference on Machine Learning (ICML 2011),
+pp.593–600.
+
+[2] Brouard, C., Szafranski, M., d'Alché-Buc, F. (2016). [Input Output Kernel Regression: Supervised and Semi-Supervised Structured Output Prediction with Operator-Valued Kernels](https://hal.archives-ouvertes.fr/hal-01601982/document).  Journal of Machine
+Learning Research, Microtome Publishing.
+
+[3] Brouard, C., Shen, H., Dührkop, K., d'Alché-Buc, F., Böcker, S., & Rousu, J. (2016) [Fast metabolite identification with input output kernel regression](https://hal.inrae.fr/hal-02637720/document).  Bioinformatics, Oxford University
+Press (OUP)
+
+
+
+
+
 ## Usecase of OK3 Trees
 
 ```python
