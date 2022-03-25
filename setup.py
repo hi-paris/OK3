@@ -1,8 +1,9 @@
-from setuptools import find_packages
+from setuptools import find_packages,setup, find_packages, Command
 # from setuptools import setup as setuppackage
 from distutils.core import Extension, setup
 from Cython.Build import cythonize
 import numpy as np
+import os
 
 with open("README.md", 'r') as f:
     long_description = f.read()
@@ -31,6 +32,27 @@ setup(
     ],
     python_requires=">=2.7"
 )
+
+
+class CleanCommand(Command):
+    """Custom clean command to tidy up the project root."""
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info')
+
+# Further down when you call setup()
+setup(
+    # ... Other setup options
+    cmdclass={
+        'clean': CleanCommand,
+    }
+)
+
+
 
 """
 import os
