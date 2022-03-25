@@ -77,7 +77,7 @@ import OK3
 
 ### Examples and Notebooks
 
-The examples folder contain several examples and use case for the library. The full documentation with examples and output is available on [https://IOKR.github.io/](https://OK3.github.io/).
+The examples folder contain several examples and use case for the library. The full documentation with examples and output is available on [https://OK3.github.io/](https://OK3.github.io/).
 
 
 ## Acknowledgements
