@@ -561,7 +561,6 @@ class BaseKernelizedOutputTree(StructuredOutputMixin, BaseEstimator, metaclass=A
                 return self.leaves_preds[X_leaves_indices]
 
         # We calculate the entireness of exits with the ensemble of candidates (and we update self.leaves_preds)
-on calcule la totalité des sorties avec cet ensemble de candidats (et on met à jour self.leaves_preds)
         self.decode_tree(candidates, return_top_k=return_top_k)
         # We use those exits to calculate those required
         return self.predict(X, return_top_k=return_top_k)
