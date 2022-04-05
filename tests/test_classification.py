@@ -1,6 +1,6 @@
 
 import numpy as np
-from _classes import OK3Regressor
+from OK3._classes import OK3Regressor
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import datasets
 from sklearn.datasets import make_blobs

@@ -1,7 +1,7 @@
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from _forest import RandomOKForestRegressor
+from OK3._forest import RandomOKForestRegressor
 from sklearn import datasets
 from sklearn.datasets import make_blobs
 import time

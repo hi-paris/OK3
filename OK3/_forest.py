@@ -44,15 +44,15 @@ from joblib import Parallel, delayed
 
 import itertools
 
-from base import StructuredOutputMixin
+from OK3.base import StructuredOutputMixin
 
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import hamming_loss
 from sklearn.metrics import r2_score
 
 from sklearn.preprocessing import OneHotEncoder
-from _classes import OK3Regressor, ExtraOK3Regressor
-from _tree import DTYPE, DOUBLE
+from OK3._classes import OK3Regressor, ExtraOK3Regressor
+from OK3._tree import DTYPE, DOUBLE
 from sklearn.utils import check_random_state, check_array
 from sklearn.exceptions import DataConversionWarning
 
@@ -63,10 +63,10 @@ from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted, _check_sample_weight
 from sklearn.utils.validation import _deprecate_positional_args
 
-from kernel import Kernel
-from _classes import KERNELS, CRITERIA
+from OK3.kernel import Kernel
+from OK3._classes import KERNELS, CRITERIA
 
-from _criterion import Criterion, KernelizedMSE
+from OK3._criterion import Criterion, KernelizedMSE
 
 import line_profiler
 

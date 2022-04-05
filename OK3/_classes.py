@@ -22,7 +22,7 @@ from sklearn.metrics import r2_score
 from sklearn.base import BaseEstimator
 from sklearn.base import clone
 
-from base import StructuredOutputMixin
+from OK3.base import StructuredOutputMixin
 
 from sklearn.utils import Bunch
 from sklearn.utils import check_array
@@ -32,15 +32,15 @@ from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.validation import _deprecate_positional_args
 
-from _criterion import Criterion
-from _splitter import Splitter
-from kernel import Kernel
-from _tree import DepthFirstTreeBuilder
-from _tree import BestFirstTreeBuilder
-from _tree import Tree
-from _tree import _build_pruned_tree_ccp
-from _tree import ccp_pruning_path
-import _tree, _splitter, _criterion, kernel
+from OK3._criterion import Criterion
+from OK3._splitter import Splitter
+from OK3.kernel import Kernel
+from OK3._tree import DepthFirstTreeBuilder
+from OK3._tree import BestFirstTreeBuilder
+from OK3._tree import Tree
+from OK3._tree import _build_pruned_tree_ccp
+from OK3._tree import ccp_pruning_path
+from OK3 import _tree, _splitter, _criterion, kernel
 
 __all__ = ["OK3Regressor", "ExtraOK3Regressor"]
 

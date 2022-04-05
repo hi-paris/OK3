@@ -11,8 +11,8 @@ from sklearn.exceptions import NotFittedError
 from sklearn.metrics import mean_squared_error as MSE
 #from sklearn.metrics import f1_score, recall_score, precision_score, accuracy_score
 #from sklearn.utils.estimator_checks import check_estimator
-from _classes import OK3Regressor
-from _classes import ExtraOK3Regressor
+from OK3._classes import OK3Regressor
+from OK3._classes import ExtraOK3Regressor
 
 
 #Estimators to check

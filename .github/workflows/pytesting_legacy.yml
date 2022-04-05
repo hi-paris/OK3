@@ -39,6 +39,7 @@ jobs:
     #    flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Build and compile
       run: |
+        make dist
         python setup.py develop
         #python setup.py sdist
     #    python setup.py build_ext --inplace
@@ -46,4 +47,4 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
-        pytest tests/test_tree_clf_and_reg.py
+        pytest tests/test_tree_clf_and_reg.py  tests/test_forest_clf_and_reg.py

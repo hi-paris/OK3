@@ -1,4 +1,4 @@
-include pythonOK3/_criterion.pxd
-include pythonOK3/_splitter.pxd
-include pythonOK3/_tree.pxd
-include pythonOK3/
+#include pythonOK3/_criterion.pxd
+#include pythonOK3/_splitter.pxd
+#include pythonOK3/_tree.pxd
+#include pythonOK3/

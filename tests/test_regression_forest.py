@@ -3,7 +3,7 @@
 import time
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from _forest import RandomOKForestRegressor
+from OK3._forest import RandomOKForestRegressor
 from sklearn.metrics import mean_squared_error
 
 
