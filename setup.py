@@ -1,92 +1,102 @@
-from setuptools import find_packages,setup, find_packages, Command
-# from setuptools import setup as setuppackage
-from distutils.core import Extension, setup
-from Cython.Build import cythonize
-import numpy as np
+#!/usr/bin/env python
+
 import os
+import re
+import subprocess
+import sys
 
-with open("README.md", 'r') as f:
-    long_description = f.read()
-
-setup(
-    name="OK3",
-    version="0.0.1", 
-    packages=find_packages(),
-    author="???",
-    description="???",
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    url="https://github.com/hi-paris/OK3",
-    #extensions = [Extension("*", ["*.pyx"])],
-    #cmdclass={'build_ext': Cython.Build.build_ext},
-    ext_modules=cythonize(["OK3/_tree.pyx", "OK3/_splitter.pyx", "OK3/_criterion.pyx"], language_level="3"),
-    include_dirs=[np.get_include()],
-    setup_requires=[
-        # Setuptools 18.0 properly handles Cython extensions.
-        'setuptools>=18.0',
-        'cython',
-    ],
-    install_requires=[
-        'numpy>=1.19.2',
-        'cython',
-    ],
-    python_requires=">=2.7"
-)
-
-
-class CleanCommand(Command):
-    """Custom clean command to tidy up the project root."""
-    user_options = []
-    def initialize_options(self):
-        pass
-    def finalize_options(self):
-        pass
-    def run(self):
-        os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info')
-
-# Further down when you call setup()
-setup(
-    # ... Other setup options
-    cmdclass={
-        'clean': CleanCommand,
-    }
-)
-
-
-
-"""
-import os
+from setuptools import find_packages, setup
+from setuptools.extension import Extension
 
 import numpy
-from numpy.distutils.misc_util import Configuration
+from Cython.Build import cythonize
 
+sys.path.append(os.path.join("OK3", "helpers"))    ########################333
+from openmp_helpers import check_openmp_support
 
-def configuration(parent_package="", top_path=None):
-    config = Configuration("tree", parent_package, top_path)
-    libraries = []
-    if os.name == 'posix':
-        libraries.append('m')
-    config.add_extension("_tree",
-                         sources=["_tree.pyx"],
-                         include_dirs=[numpy.get_include()],
-                         libraries=libraries,
-                         extra_compile_args=["-O3"])
-    config.add_extension("_splitter",
-                         sources=["_splitter.pyx"],
-                         include_dirs=[numpy.get_include()],
-                         libraries=libraries,
-                         extra_compile_args=["-O3"])
-    config.add_extension("_criterion",
-                         sources=["_criterion.pyx"],
-                         include_dirs=[numpy.get_include()],
-                         libraries=libraries,
-                         extra_compile_args=["-O3"])
+# dirty but working
+__version__ = re.search(
+    r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',  # It excludes inline comment too
+    open('OK3/__init__.py').read()).group(1)
+# The beautiful part is, I don't even need to check exceptions here.
+# If something messes up, let the build process fail noisy, BEFORE my release!
 
-    #config.add_subpackage("tests")
+# thanks PyPI for handling markdown now
+ROOT = os.path.abspath(os.path.dirname(__file__))
+# with open(os.path.join(ROOT, 'README.md'), encoding="utf-8") as f:
+#     README = f.read()
 
-    return config
+# #################clean cython output is clean is called
+# if 'clean' in sys.argv[1:]:
+#     if os.path.isfile('ot/lp/emd_wrap.cpp'):
+#         os.remove('ot/lp/emd_wrap.cpp')
 
-if __name__ == "__main__":
-    from numpy.distutils.core import setup
-    setup(**configuration().todict())
-"""
+# add platform dependant optional compilation argument
+openmp_supported, flags = check_openmp_support()
+compile_args = ["/O2" if sys.platform == "win32" else "-O3"]
+link_args = []
+
+if openmp_supported:
+    compile_args += flags + ["/DOMP" if sys.platform == 'win32' else "-DOMP"]
+    link_args += flags
+
+if sys.platform.startswith('darwin'):
+    compile_args.append("-stdlib=libc++")
+    sdk_path = subprocess.check_output(['xcrun', '--show-sdk-path'])
+    os.environ['CFLAGS'] = '-isysroot "{}"'.format(sdk_path.rstrip().decode("utf-8"))
+
+setup(
+    name='POT',
+    version=__version__,
+    description='Python Optimal Transport Library',
+    # long_description=README,
+    long_description_content_type='text/markdown',
+    author=u'Remi Flamary, Nicolas Courty',
+    author_email='remi.flamary@gmail.com, ncourty@gmail.com',
+    url='https://github.com/PythonOT/POT',
+    packages=find_packages(exclude=["benchmarks"]),
+    ext_modules=cythonize(Extension(
+        name="*",
+        sources=["OK3/*.pyx"],  # cython/c++ src files
+        #language="c++",
+        include_dirs=[numpy.get_include(), os.path.join(ROOT, 'OK3/test')],
+        # include_dirs=[numpy.get_include()],
+        extra_compile_args=compile_args,
+        extra_link_args=link_args
+    )),
+    platforms=['linux', 'macosx', 'windows'],
+    download_url='https://github.com/PythonOT/POT/archive/{}.tar.gz'.format(__version__),
+    license='MIT',
+    scripts=[],
+    data_files=[],
+    setup_requires=["oldest-supported-numpy", "cython>=0.23"],
+    install_requires=["numpy>=1.16", "scipy>=1.0", "scikit-learn"],
+    python_requires=">=3.6",
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Education',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
+        'Environment :: Console',
+        'Operating System :: OS Independent',
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: MacOS',
+        'Operating System :: POSIX',
+        'Operating System :: Microsoft :: Windows',
+        'Programming Language :: Python',
+        # 'Programming Language :: C++',
+        # 'Programming Language :: C',
+        'Programming Language :: Cython',
+        'Topic :: Utilities',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Scientific/Engineering :: Information Analysis',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+    ]
+)
