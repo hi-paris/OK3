@@ -36,9 +36,9 @@ from sklearn import datasets
 from sklearn.decomposition import TruncatedSVD
 from sklearn.datasets import make_classification
 
-from _forest import ExtraOKTreesRegressor
-from _forest import RandomOKForestRegressor
-from _forest import RandomOKTreesEmbedding
+from OK3._forest import ExtraOKTreesRegressor
+from OK3._forest import RandomOKForestRegressor
+from OK3._forest import RandomOKTreesEmbedding
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import LinearSVC

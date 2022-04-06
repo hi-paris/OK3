@@ -15,9 +15,9 @@ sys.path.append(os.path.join("OK3", "helpers"))    ########################333
 from openmp_helpers import check_openmp_support
 
 # dirty but working
-__version__ = re.search(
-    r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',  # It excludes inline comment too
-    open('OK3/__init__.py').read()).group(1)
+# __version__ = re.search(
+#     r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',  # It excludes inline comment too
+#     open('OK3/__init__.py').read()).group(1)
 # The beautiful part is, I don't even need to check exceptions here.
 # If something messes up, let the build process fail noisy, BEFORE my release!
 
@@ -46,8 +46,8 @@ if sys.platform.startswith('darwin'):
     os.environ['CFLAGS'] = '-isysroot "{}"'.format(sdk_path.rstrip().decode("utf-8"))
 
 setup(
-    name='POT',
-    version=__version__,
+    name='OK3',
+    version='0.0.1',
     description='Python Optimal Transport Library',
     # long_description=README,
     long_description_content_type='text/markdown',
@@ -65,7 +65,7 @@ setup(
         extra_link_args=link_args
     )),
     platforms=['linux', 'macosx', 'windows'],
-    download_url='https://github.com/PythonOT/POT/archive/{}.tar.gz'.format(__version__),
+    #download_url='https://github.com/PythonOT/POT/archive/{}.tar.gz'.format(__version__),
     license='MIT',
     scripts=[],
     data_files=[],

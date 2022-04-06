@@ -30,13 +30,13 @@ from sklearn.utils.validation import check_random_state
 
 from sklearn.exceptions import NotFittedError
 
-import _tree
+import OK3._tree
 
-from _classes import OK3Regressor
-from _classes import ExtraOK3Regressor
+from OK3._classes import OK3Regressor
+from OK3._classes import ExtraOK3Regressor
 
-from _tree import TREE_LEAF, TREE_UNDEFINED
-from _classes import CRITERIA
+from OK3._tree import TREE_LEAF, TREE_UNDEFINED
+from OK3._classes import CRITERIA
 from sklearn import datasets
 
 from sklearn.utils import compute_sample_weight
@@ -733,7 +733,7 @@ def test_min_samples_split():
     None
 
     """
-    X = np.asfortranarray(iris.data, dtype=_tree.DTYPE)
+    X = np.asfortranarray(iris.data, dtype=OK3._tree.DTYPE)
     y = iris.target
 
     # test both DepthFirstTreeBuilder and BestFirstTreeBuilder
@@ -777,7 +777,7 @@ def test_min_samples_leaf():
 
     """
     # Test if leaves contain more than leaf_count training examples
-    X = np.asfortranarray(iris.data, dtype=_tree.DTYPE)
+    X = np.asfortranarray(iris.data, dtype=OK3._tree.DTYPE)
     y = iris.target
 
     # test both DepthFirstTreeBuilder and BestFirstTreeBuilder
@@ -1048,7 +1048,7 @@ def test_min_impurity_split():
     # test if min_impurity_split creates leaves with impurity
     # [0, min_impurity_split) when min_samples_leaf = 1 and
     # min_samples_split = 2.
-    X = np.asfortranarray(iris.data, dtype=_tree.DTYPE)
+    X = np.asfortranarray(iris.data, dtype=OK3._tree.DTYPE)
     y = iris.target
 
     # test both DepthFirstTreeBuilder and BestFirstTreeBuilder
@@ -1378,7 +1378,7 @@ def test_sample_weight():
     clf2 = OK3Regressor(random_state=1, kernel="gini_clf")
     clf2.fit(X, y, sample_weight=sample_weight)
 
-    internal = clf.tree_.children_left != _tree.TREE_LEAF
+    internal = clf.tree_.children_left != OK3._tree.TREE_LEAF
     assert_array_almost_equal(clf.tree_.threshold[internal],
                               clf2.tree_.threshold[internal])
 
@@ -2108,7 +2108,7 @@ def test_min_weight_leaf_split_level(name):
 
 """@Gaetan for completmentary checking"""
 def check_public_apply(name):
-    X_small32 = X_small.astype(_tree.DTYPE, copy=False)
+    X_small32 = X_small.astype(OK3._tree.DTYPE, copy=False)
 
     for kernel in ["gini_clf", "mse_reg"]:
         est = OKTREES[name](kernel=kernel)
@@ -2118,7 +2118,7 @@ def check_public_apply(name):
 
 """@Gaetan for completmentary checking"""
 def check_public_apply_sparse(name):
-    X_small32 = csr_matrix(X_small.astype(_tree.DTYPE, copy=False))
+    X_small32 = csr_matrix(X_small.astype(OK3._tree.DTYPE, copy=False))
 
     for kernel in ["gini_clf", "mse_reg"]:
         est = OKTREES[name](kernel=kernel)
@@ -2530,10 +2530,10 @@ def test_prune_tree_raises_negative_ccp_alpha():
 
 """@Gaetan for completmentary checking"""
 def check_apply_path_readonly(name):
-    X_readonly = create_memmap_backed_data(X_small.astype(_tree.DTYPE,
+    X_readonly = create_memmap_backed_data(X_small.astype(OK3._tree.DTYPE,
                                                           copy=False))
     y_readonly = create_memmap_backed_data(np.array(y_small,
-                                                    dtype=_tree.DTYPE))
+                                                    dtype=OK3._tree.DTYPE))
     for kernel in ["gini_clf", "mse_reg"]:
         est = OKTREES[name](kernel=kernel)
         est.fit(X_readonly, y_readonly)

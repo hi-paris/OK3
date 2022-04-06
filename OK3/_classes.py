@@ -22,7 +22,7 @@ from sklearn.metrics import r2_score
 from sklearn.base import BaseEstimator
 from sklearn.base import clone
 
-from base import StructuredOutputMixin
+from OK3.base import StructuredOutputMixin
 
 from sklearn.utils import Bunch
 from sklearn.utils import check_array
@@ -40,7 +40,7 @@ from OK3._tree import BestFirstTreeBuilder
 from OK3._tree import Tree
 from OK3._tree import _build_pruned_tree_ccp
 from OK3._tree import ccp_pruning_path
-import OK3._tree, OK3._splitter, OK3._criterion, OK3.kernel
+from OK3 import _tree, _splitter, _criterion, kernel
 
 __all__ = ["OK3Regressor", "ExtraOK3Regressor"]
 

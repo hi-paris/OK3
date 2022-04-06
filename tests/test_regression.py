@@ -3,7 +3,7 @@
 import time
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
-from _classes import OK3Regressor
+from OK3._classes import OK3Regressor
 from sklearn.metrics import mean_squared_error
 
 
