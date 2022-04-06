@@ -1738,7 +1738,7 @@ def check_sparse_input(tree, dataset, max_depth=None, only_reg=False):
 @pytest.mark.parametrize("tree_type", SPARSE_TREES)
 @pytest.mark.parametrize(
         "dataset",
-        ("clf_small", "toy", "digits", "multilabel",
+        ("clf_small", "toy", "digits", #"multilabel",
           "sparse-pos", "sparse-neg", "sparse-mix",
           "zeros")
 )

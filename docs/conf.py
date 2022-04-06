@@ -12,7 +12,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('..')) #os.path.abspath('.')
 
 
 # -- Project information -----------------------------------------------------
@@ -34,7 +34,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.autosummary',
     'sphinx.ext.mathjax',
-    'nbsphinx',
+    #'nbsphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -52,11 +52,19 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+html_logo = './LogoTelecom.png'
+html_theme_options = {
+    'navigation_depth': 7,
+    'logo_only': True
+
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 
 html_static_path = ['_static']
-
+html_css_files = [
+    'css/custom.css',
+]
 add_modules_names = False
