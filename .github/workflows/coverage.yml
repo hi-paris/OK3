@@ -41,5 +41,5 @@ jobs:
       run: |
         pip install pytest
         pip install coverage
-        coverage run -m pytest
+        coverage run -m pytest tests/test_tree_clf_and_reg.py  tests/test_forest_clf_and_reg.py tests/test_complementary.py
         coverage report -m 
