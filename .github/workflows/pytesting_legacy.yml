@@ -41,7 +41,7 @@ jobs:
       run: |
         make dist
         python setup.py develop
-        #python setup.py sdist
+    #    python setup.py sdist
     #    python setup.py build_ext --inplace
         
     - name: Test with pytest

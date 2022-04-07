@@ -1285,45 +1285,51 @@ def test_memory_layout():
     None
     """
     # Check that it works no matter the memory layout
-    for (name, TreeEstimator), dtype in product(OKTREES.items(),
-                                                [np.float64, np.float32]):
+    for (name, TreeEstimator), dtype in product(OKTREES.items(), [np.float64, np.float32]):
         for kernel in ["gini_clf", "mse_reg"]:
             est = TreeEstimator(random_state=0, kernel=kernel)
     
             # Nothing
-            X = np.asarray(iris.data, dtype=dtype)
+            X = np.asarray(iris.data, dtype=np.float64)
+            X2 = np.asarray(iris.data, dtype=np.float32)
             y = iris.target
-            assert_array_equal(est.fit(X, y).predict(X), y)
+            assert_array_equal(est.fit(X, y).predict(X), est.fit(X2, y).predict(X2))
     
             # C-order
-            X = np.asarray(iris.data, order="C", dtype=dtype)
+            X = np.asarray(iris.data, order="C", dtype=np.float64)
+            X2 = np.asarray(iris.data, order="C", dtype=np.float32)
             y = iris.target
-            assert_array_equal(est.fit(X, y).predict(X), y)
+            assert_array_equal(est.fit(X, y).predict(X), est.fit(X2, y).predict(X2))
     
             # F-order
-            X = np.asarray(iris.data, order="F", dtype=dtype)
+            X = np.asarray(iris.data, order="F", dtype=np.float64)
+            X2 = np.asarray(iris.data, order="F", dtype=np.float32)
             y = iris.target
-            assert_array_equal(est.fit(X, y).predict(X), y)
+            assert_array_equal(est.fit(X, y).predict(X), est.fit(X2, y).predict(X2))
     
             # Contiguous
-            X = np.ascontiguousarray(iris.data, dtype=dtype)
+            X = np.ascontiguousarray(iris.data, dtype=np.float64)
+            X2 = np.ascontiguousarray(iris.data, dtype=np.float32)
             y = iris.target
-            assert_array_equal(est.fit(X, y).predict(X), y)
+            assert_array_equal(est.fit(X, y).predict(X), est.fit(X2, y).predict(X2))
     
             # csr matrix
-            X = csr_matrix(iris.data, dtype=dtype)
+            X = csr_matrix(iris.data, dtype=np.float64)
+            X2 = csr_matrix(iris.data, dtype=np.float32)
             y = iris.target
-            assert_array_equal(est.fit(X, y).predict(X), y)
+            assert_array_equal(est.fit(X, y).predict(X), est.fit(X2, y).predict(X2))
     
             # csc_matrix
-            X = csc_matrix(iris.data, dtype=dtype)
+            X = csc_matrix(iris.data, dtype=np.float64)
+            X2 = csc_matrix(iris.data, dtype=np.float32)
             y = iris.target
-            assert_array_equal(est.fit(X, y).predict(X), y)
+            assert_array_equal(est.fit(X, y).predict(X), est.fit(X2, y).predict(X2))
     
             # Strided
-            X = np.asarray(iris.data[::3], dtype=dtype)
+            X = np.asarray(iris.data[::3], dtype=np.float64)
+            X2 = np.asarray(iris.data[::3], dtype=np.float32)
             y = iris.target[::3]
-            assert_array_equal(est.fit(X, y).predict(X), y)
+            assert_array_equal(est.fit(X, y).predict(X), est.fit(X2, y).predict(X2))
 
 
 def test_sample_weight():
